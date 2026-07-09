@@ -18,10 +18,13 @@ export const Route = createFileRoute("/mfa-setup")({
 
 const SECRET = "JBSW Y3DP EHPK 3PXP GEZD MNBV";
 
-// Simple SVG QR placeholder pattern (not a real QR — visual only)
+// Visual QR placeholder — decorative only
 function QrPlaceholder() {
   return (
-    <div className="grid h-48 w-48 grid-cols-21 gap-px overflow-hidden rounded-md bg-foreground p-2">
+    <div
+      className="h-48 w-48 overflow-hidden rounded-md bg-foreground p-2"
+      style={{ display: "grid", gridTemplateColumns: "repeat(21, 1fr)", gap: 1 }}
+    >
       {Array.from({ length: 441 }).map((_, i) => {
         const on = Math.random() > 0.45 || [0, 6, 14, 20, 420, 426, 434, 440].includes(i);
         return <div key={i} className={on ? "bg-background" : "bg-foreground"} />;
