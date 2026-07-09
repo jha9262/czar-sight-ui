@@ -14,8 +14,19 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppWarehousesRouteImport } from './routes/_app.warehouses'
+import { Route as AppUsersRouteImport } from './routes/_app.users'
+import { Route as AppSettingsRouteImport } from './routes/_app.settings'
+import { Route as AppProductModelsRouteImport } from './routes/_app.product-models'
 import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
+import { Route as AppBomRouteImport } from './routes/_app.bom'
+import { Route as AppStockTemplatesRouteImport } from './routes/_app.stock.templates'
+import { Route as AppStockLedgerRouteImport } from './routes/_app.stock.ledger'
+import { Route as AppStockEntriesRouteImport } from './routes/_app.stock.entries'
 import { Route as AppInventoryStockRouteImport } from './routes/_app.inventory.stock'
+import { Route as AppInventorySourcingRouteImport } from './routes/_app.inventory.sourcing'
+import { Route as AppInventoryPartsRouteImport } from './routes/_app.inventory.parts'
+import { Route as AppInventoryItemsRouteImport } from './routes/_app.inventory.items'
+import { Route as AppBomIdRouteImport } from './routes/_app.bom.$id'
 
 const MfaSetupRoute = MfaSetupRouteImport.update({
   id: '/mfa-setup',
@@ -41,9 +52,44 @@ const AppWarehousesRoute = AppWarehousesRouteImport.update({
   path: '/warehouses',
   getParentRoute: () => AppRoute,
 } as any)
+const AppUsersRoute = AppUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSettingsRoute = AppSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppProductModelsRoute = AppProductModelsRouteImport.update({
+  id: '/product-models',
+  path: '/product-models',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppDashboardRoute = AppDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppBomRoute = AppBomRouteImport.update({
+  id: '/bom',
+  path: '/bom',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppStockTemplatesRoute = AppStockTemplatesRouteImport.update({
+  id: '/stock/templates',
+  path: '/stock/templates',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppStockLedgerRoute = AppStockLedgerRouteImport.update({
+  id: '/stock/ledger',
+  path: '/stock/ledger',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppStockEntriesRoute = AppStockEntriesRouteImport.update({
+  id: '/stock/entries',
+  path: '/stock/entries',
   getParentRoute: () => AppRoute,
 } as any)
 const AppInventoryStockRoute = AppInventoryStockRouteImport.update({
@@ -51,22 +97,64 @@ const AppInventoryStockRoute = AppInventoryStockRouteImport.update({
   path: '/inventory/stock',
   getParentRoute: () => AppRoute,
 } as any)
+const AppInventorySourcingRoute = AppInventorySourcingRouteImport.update({
+  id: '/inventory/sourcing',
+  path: '/inventory/sourcing',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppInventoryPartsRoute = AppInventoryPartsRouteImport.update({
+  id: '/inventory/parts',
+  path: '/inventory/parts',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppInventoryItemsRoute = AppInventoryItemsRouteImport.update({
+  id: '/inventory/items',
+  path: '/inventory/items',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppBomIdRoute = AppBomIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AppBomRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/mfa-setup': typeof MfaSetupRoute
+  '/bom': typeof AppBomRouteWithChildren
   '/dashboard': typeof AppDashboardRoute
+  '/product-models': typeof AppProductModelsRoute
+  '/settings': typeof AppSettingsRoute
+  '/users': typeof AppUsersRoute
   '/warehouses': typeof AppWarehousesRoute
+  '/bom/$id': typeof AppBomIdRoute
+  '/inventory/items': typeof AppInventoryItemsRoute
+  '/inventory/parts': typeof AppInventoryPartsRoute
+  '/inventory/sourcing': typeof AppInventorySourcingRoute
   '/inventory/stock': typeof AppInventoryStockRoute
+  '/stock/entries': typeof AppStockEntriesRoute
+  '/stock/ledger': typeof AppStockLedgerRoute
+  '/stock/templates': typeof AppStockTemplatesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/mfa-setup': typeof MfaSetupRoute
+  '/bom': typeof AppBomRouteWithChildren
   '/dashboard': typeof AppDashboardRoute
+  '/product-models': typeof AppProductModelsRoute
+  '/settings': typeof AppSettingsRoute
+  '/users': typeof AppUsersRoute
   '/warehouses': typeof AppWarehousesRoute
+  '/bom/$id': typeof AppBomIdRoute
+  '/inventory/items': typeof AppInventoryItemsRoute
+  '/inventory/parts': typeof AppInventoryPartsRoute
+  '/inventory/sourcing': typeof AppInventorySourcingRoute
   '/inventory/stock': typeof AppInventoryStockRoute
+  '/stock/entries': typeof AppStockEntriesRoute
+  '/stock/ledger': typeof AppStockLedgerRoute
+  '/stock/templates': typeof AppStockTemplatesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -74,9 +162,20 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
   '/mfa-setup': typeof MfaSetupRoute
+  '/_app/bom': typeof AppBomRouteWithChildren
   '/_app/dashboard': typeof AppDashboardRoute
+  '/_app/product-models': typeof AppProductModelsRoute
+  '/_app/settings': typeof AppSettingsRoute
+  '/_app/users': typeof AppUsersRoute
   '/_app/warehouses': typeof AppWarehousesRoute
+  '/_app/bom/$id': typeof AppBomIdRoute
+  '/_app/inventory/items': typeof AppInventoryItemsRoute
+  '/_app/inventory/parts': typeof AppInventoryPartsRoute
+  '/_app/inventory/sourcing': typeof AppInventorySourcingRoute
   '/_app/inventory/stock': typeof AppInventoryStockRoute
+  '/_app/stock/entries': typeof AppStockEntriesRoute
+  '/_app/stock/ledger': typeof AppStockLedgerRoute
+  '/_app/stock/templates': typeof AppStockTemplatesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -84,26 +183,59 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/mfa-setup'
+    | '/bom'
     | '/dashboard'
+    | '/product-models'
+    | '/settings'
+    | '/users'
     | '/warehouses'
+    | '/bom/$id'
+    | '/inventory/items'
+    | '/inventory/parts'
+    | '/inventory/sourcing'
     | '/inventory/stock'
+    | '/stock/entries'
+    | '/stock/ledger'
+    | '/stock/templates'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/login'
     | '/mfa-setup'
+    | '/bom'
     | '/dashboard'
+    | '/product-models'
+    | '/settings'
+    | '/users'
     | '/warehouses'
+    | '/bom/$id'
+    | '/inventory/items'
+    | '/inventory/parts'
+    | '/inventory/sourcing'
     | '/inventory/stock'
+    | '/stock/entries'
+    | '/stock/ledger'
+    | '/stock/templates'
   id:
     | '__root__'
     | '/'
     | '/_app'
     | '/login'
     | '/mfa-setup'
+    | '/_app/bom'
     | '/_app/dashboard'
+    | '/_app/product-models'
+    | '/_app/settings'
+    | '/_app/users'
     | '/_app/warehouses'
+    | '/_app/bom/$id'
+    | '/_app/inventory/items'
+    | '/_app/inventory/parts'
+    | '/_app/inventory/sourcing'
     | '/_app/inventory/stock'
+    | '/_app/stock/entries'
+    | '/_app/stock/ledger'
+    | '/_app/stock/templates'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -150,11 +282,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppWarehousesRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/users': {
+      id: '/_app/users'
+      path: '/users'
+      fullPath: '/users'
+      preLoaderRoute: typeof AppUsersRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/settings': {
+      id: '/_app/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AppSettingsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/product-models': {
+      id: '/_app/product-models'
+      path: '/product-models'
+      fullPath: '/product-models'
+      preLoaderRoute: typeof AppProductModelsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/dashboard': {
       id: '/_app/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AppDashboardRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/bom': {
+      id: '/_app/bom'
+      path: '/bom'
+      fullPath: '/bom'
+      preLoaderRoute: typeof AppBomRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/stock/templates': {
+      id: '/_app/stock/templates'
+      path: '/stock/templates'
+      fullPath: '/stock/templates'
+      preLoaderRoute: typeof AppStockTemplatesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/stock/ledger': {
+      id: '/_app/stock/ledger'
+      path: '/stock/ledger'
+      fullPath: '/stock/ledger'
+      preLoaderRoute: typeof AppStockLedgerRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/stock/entries': {
+      id: '/_app/stock/entries'
+      path: '/stock/entries'
+      fullPath: '/stock/entries'
+      preLoaderRoute: typeof AppStockEntriesRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/inventory/stock': {
@@ -164,19 +345,78 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppInventoryStockRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/inventory/sourcing': {
+      id: '/_app/inventory/sourcing'
+      path: '/inventory/sourcing'
+      fullPath: '/inventory/sourcing'
+      preLoaderRoute: typeof AppInventorySourcingRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/inventory/parts': {
+      id: '/_app/inventory/parts'
+      path: '/inventory/parts'
+      fullPath: '/inventory/parts'
+      preLoaderRoute: typeof AppInventoryPartsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/inventory/items': {
+      id: '/_app/inventory/items'
+      path: '/inventory/items'
+      fullPath: '/inventory/items'
+      preLoaderRoute: typeof AppInventoryItemsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/bom/$id': {
+      id: '/_app/bom/$id'
+      path: '/$id'
+      fullPath: '/bom/$id'
+      preLoaderRoute: typeof AppBomIdRouteImport
+      parentRoute: typeof AppBomRoute
+    }
   }
 }
 
+interface AppBomRouteChildren {
+  AppBomIdRoute: typeof AppBomIdRoute
+}
+
+const AppBomRouteChildren: AppBomRouteChildren = {
+  AppBomIdRoute: AppBomIdRoute,
+}
+
+const AppBomRouteWithChildren =
+  AppBomRoute._addFileChildren(AppBomRouteChildren)
+
 interface AppRouteChildren {
+  AppBomRoute: typeof AppBomRouteWithChildren
   AppDashboardRoute: typeof AppDashboardRoute
+  AppProductModelsRoute: typeof AppProductModelsRoute
+  AppSettingsRoute: typeof AppSettingsRoute
+  AppUsersRoute: typeof AppUsersRoute
   AppWarehousesRoute: typeof AppWarehousesRoute
+  AppInventoryItemsRoute: typeof AppInventoryItemsRoute
+  AppInventoryPartsRoute: typeof AppInventoryPartsRoute
+  AppInventorySourcingRoute: typeof AppInventorySourcingRoute
   AppInventoryStockRoute: typeof AppInventoryStockRoute
+  AppStockEntriesRoute: typeof AppStockEntriesRoute
+  AppStockLedgerRoute: typeof AppStockLedgerRoute
+  AppStockTemplatesRoute: typeof AppStockTemplatesRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppBomRoute: AppBomRouteWithChildren,
   AppDashboardRoute: AppDashboardRoute,
+  AppProductModelsRoute: AppProductModelsRoute,
+  AppSettingsRoute: AppSettingsRoute,
+  AppUsersRoute: AppUsersRoute,
   AppWarehousesRoute: AppWarehousesRoute,
+  AppInventoryItemsRoute: AppInventoryItemsRoute,
+  AppInventoryPartsRoute: AppInventoryPartsRoute,
+  AppInventorySourcingRoute: AppInventorySourcingRoute,
   AppInventoryStockRoute: AppInventoryStockRoute,
+  AppStockEntriesRoute: AppStockEntriesRoute,
+  AppStockLedgerRoute: AppStockLedgerRoute,
+  AppStockTemplatesRoute: AppStockTemplatesRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
