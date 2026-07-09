@@ -9,38 +9,133 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as MfaSetupRouteImport } from './routes/mfa-setup'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppWarehousesRouteImport } from './routes/_app.warehouses'
+import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
+import { Route as AppInventoryStockRouteImport } from './routes/_app.inventory.stock'
 
+const MfaSetupRoute = MfaSetupRouteImport.update({
+  id: '/mfa-setup',
+  path: '/mfa-setup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppWarehousesRoute = AppWarehousesRouteImport.update({
+  id: '/warehouses',
+  path: '/warehouses',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDashboardRoute = AppDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppInventoryStockRoute = AppInventoryStockRouteImport.update({
+  id: '/inventory/stock',
+  path: '/inventory/stock',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/mfa-setup': typeof MfaSetupRoute
+  '/dashboard': typeof AppDashboardRoute
+  '/warehouses': typeof AppWarehousesRoute
+  '/inventory/stock': typeof AppInventoryStockRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/mfa-setup': typeof MfaSetupRoute
+  '/dashboard': typeof AppDashboardRoute
+  '/warehouses': typeof AppWarehousesRoute
+  '/inventory/stock': typeof AppInventoryStockRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_app': typeof AppRouteWithChildren
+  '/login': typeof LoginRoute
+  '/mfa-setup': typeof MfaSetupRoute
+  '/_app/dashboard': typeof AppDashboardRoute
+  '/_app/warehouses': typeof AppWarehousesRoute
+  '/_app/inventory/stock': typeof AppInventoryStockRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/mfa-setup'
+    | '/dashboard'
+    | '/warehouses'
+    | '/inventory/stock'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/login'
+    | '/mfa-setup'
+    | '/dashboard'
+    | '/warehouses'
+    | '/inventory/stock'
+  id:
+    | '__root__'
+    | '/'
+    | '/_app'
+    | '/login'
+    | '/mfa-setup'
+    | '/_app/dashboard'
+    | '/_app/warehouses'
+    | '/_app/inventory/stock'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRouteWithChildren
+  LoginRoute: typeof LoginRoute
+  MfaSetupRoute: typeof MfaSetupRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/mfa-setup': {
+      id: '/mfa-setup'
+      path: '/mfa-setup'
+      fullPath: '/mfa-setup'
+      preLoaderRoute: typeof MfaSetupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +143,50 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app/warehouses': {
+      id: '/_app/warehouses'
+      path: '/warehouses'
+      fullPath: '/warehouses'
+      preLoaderRoute: typeof AppWarehousesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/dashboard': {
+      id: '/_app/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AppDashboardRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/inventory/stock': {
+      id: '/_app/inventory/stock'
+      path: '/inventory/stock'
+      fullPath: '/inventory/stock'
+      preLoaderRoute: typeof AppInventoryStockRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
+interface AppRouteChildren {
+  AppDashboardRoute: typeof AppDashboardRoute
+  AppWarehousesRoute: typeof AppWarehousesRoute
+  AppInventoryStockRoute: typeof AppInventoryStockRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppDashboardRoute: AppDashboardRoute,
+  AppWarehousesRoute: AppWarehousesRoute,
+  AppInventoryStockRoute: AppInventoryStockRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppRoute: AppRouteWithChildren,
+  LoginRoute: LoginRoute,
+  MfaSetupRoute: MfaSetupRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
