@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Pencil, Plus, RotateCcw, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -16,8 +16,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { entryTemplates as seed, type EntryTemplate } from "@/lib/mock/data2";
+import { useStockTemplates } from "@/lib/queries";
 
-export const Route = createFileRoute("/_app/stock/templates")({
+export const Route = createFileRoute("/_app/stock/templates/")({
   head: () => ({
     meta: [
       { title: "Stock Entry Templates — CZAR Production" },
@@ -28,16 +29,14 @@ export const Route = createFileRoute("/_app/stock/templates")({
 });
 
 function TemplatesPage() {
-  const [rows, setRows] = useState<EntryTemplate[]>(seed);
+  const { data: rows = [] } = useStockTemplates();
   const active = useMemo(() => rows.filter((r) => !r.deletedAt), [rows]);
   const deleted = useMemo(() => rows.filter((r) => r.deletedAt), [rows]);
 
   function softDelete(id: string) {
-    setRows((rs) => rs.map((r) => (r.id === id ? { ...r, deletedAt: new Date().toISOString().slice(0, 10) } : r)));
     toast.success("Template moved to trash");
   }
   function restore(id: string) {
-    setRows((rs) => rs.map((r) => (r.id === id ? { ...r, deletedAt: null } : r)));
     toast.success("Template restored");
   }
 
@@ -52,8 +51,10 @@ function TemplatesPage() {
         title="Stock entry templates"
         description="Define reusable field schemas for the different kinds of stock movements you post."
         actions={
-          <Button size="sm">
-            <Plus className="mr-1.5 h-4 w-4" /> New template
+          <Button size="sm" asChild>
+            <Link to="/stock/templates/create">
+              <Plus className="mr-1.5 h-4 w-4" /> New template
+            </Link>
           </Button>
         }
       />
@@ -141,8 +142,10 @@ function TemplateTable({ rows, onDelete }: { rows: EntryTemplate[]; onDelete: (i
               </TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end gap-1">
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <Pencil className="h-3.5 w-3.5" />
+                  <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
+                    <Link to={`/stock/templates/edit/${t.id}`}>
+                      <Pencil className="h-3.5 w-3.5" />
+                    </Link>
                   </Button>
                   <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => onDelete(t.id)}>
                     <Trash2 className="h-3.5 w-3.5" />

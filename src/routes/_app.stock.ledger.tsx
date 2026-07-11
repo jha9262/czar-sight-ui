@@ -104,7 +104,7 @@ function LedgerPage() {
                       −{r.outQty.toLocaleString()}
                     </TableCell>
                     <TableCell className="text-right font-mono tabular-nums font-semibold">
-                      {r.closingQty.toLocaleString()} <span className="text-xs font-normal text-muted-foreground">{r.unit}</span>
+                      {r.closingQty.toLocaleString()}
                     </TableCell>
                     <TableCell className="text-right font-mono text-xs text-muted-foreground">
                       {r.reorderLevel.toLocaleString()}

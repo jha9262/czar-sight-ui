@@ -66,10 +66,9 @@ function BomDetailPage() {
 
       <div className="p-6">
         <div className="rounded-lg border bg-card">
-          <div className="grid grid-cols-[1fr_120px_120px_1fr] gap-4 border-b bg-muted/30 px-5 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+          <div className="grid grid-cols-[1fr_120px_1fr] gap-4 border-b bg-muted/30 px-5 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
             <div>Part</div>
             <div className="text-right">Quantity</div>
-            <div>Unit</div>
             <div>Description</div>
           </div>
           <div className="p-2">
@@ -91,7 +90,7 @@ function TreeRow({ node, depth }: { node: BomNode; depth: number }) {
   return (
     <div>
       <div
-        className="grid cursor-pointer grid-cols-[1fr_120px_120px_1fr] items-center gap-4 rounded px-3 py-2 text-sm hover:bg-accent/40"
+        className="grid cursor-pointer grid-cols-[1fr_120px_1fr] items-center gap-4 rounded px-3 py-2 text-sm hover:bg-accent/40"
         onClick={() => hasKids && setOpen((v) => !v)}
       >
         <div className="flex items-center gap-1.5" style={{ paddingLeft: depth * 20 }}>
@@ -110,7 +109,6 @@ function TreeRow({ node, depth }: { node: BomNode; depth: number }) {
           </div>
         </div>
         <div className="text-right font-mono tabular-nums">{node.quantity}</div>
-        <div className="font-mono text-xs text-muted-foreground">{node.unit}</div>
         <div className="truncate text-xs text-muted-foreground">{node.description}</div>
       </div>
       {hasKids && open && (
