@@ -64,11 +64,11 @@ function StockPage() {
         description="Individual serialized units and bulk batches held across your warehouses."
         actions={
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" asChild>
+            {/* <Button variant="outline" size="sm" asChild>
               <Link to="/inventory/stock/register-instance">
                 <Plus className="mr-1.5 h-4 w-4" /> Register Instance
               </Link>
-            </Button>
+            </Button> */}
             <Button size="sm" asChild>
               <Link to="/inventory/stock/create">
                 <Plus className="mr-1.5 h-4 w-4" /> Add stock

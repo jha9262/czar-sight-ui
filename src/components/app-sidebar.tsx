@@ -45,7 +45,6 @@ const inventory = {
     { title: "Item Templates", url: "/inventory/items" },
     { title: "Item Stock", url: "/inventory/stock" },
     { title: "Sourcing", url: "/inventory/sourcing" },
-    { title: "Product Models", url: "/product-models" },
     { title: "Bill of Materials", url: "/bom" },
   ],
 };
