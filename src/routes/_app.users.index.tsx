@@ -23,7 +23,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { users as seed, type UserRow } from "@/lib/mock/data2";
-import { useUsers, useUpdateUser, useDeleteUser } from "@/lib/queries";
+import { useUsersIndexLogic } from "@/hooks/features/administration/useUsersIndexLogic";
 
 export const Route = createFileRoute("/_app/users/")({
   head: () => ({
@@ -40,14 +40,9 @@ function initials(name: string) {
 }
 
 function UsersPage() {
-  const { data: rows = [] } = useUsers();
-  const deleteUser = useDeleteUser();
-  const [q, setQ] = useState("");
-  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
-
-  const filtered = rows.filter((u) => 
-    `${u.name} ${u.email} ${u.role}`.toLowerCase().includes(q.toLowerCase())
-  );
+  const { state, handlers } = useUsersIndexLogic();
+  const { q, filtered, deleteTarget, isDeleting } = state;
+  const { setQ, setDeleteTarget, confirmDelete } = handlers;
 
   return (
     <div>
@@ -156,11 +151,18 @@ function UsersPage() {
             </TableBody>
           </Table>
           
-          <DataTablePagination totalItems={rows.length} itemsPerPage={filtered.length} itemName="users" />
+          <DataTablePagination totalItems={filtered.length} itemsPerPage={filtered.length} itemName="users" />
         </div>
       </div>
 
-      <DeleteDialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)} title="Delete user?" description="This will remove the user and revoke all sessions." onConfirm={() => { if (deleteTarget) deleteUser.mutate(deleteTarget, { onSuccess: () => { toast.success("User deleted"); setDeleteTarget(null); } }); }} isPending={deleteUser.isPending} />
+      <DeleteDialog
+        open={!!deleteTarget}
+        onOpenChange={() => setDeleteTarget(null)}
+        title="Delete user?"
+        description="They will lose all access to the system immediately."
+        onConfirm={confirmDelete}
+        isPending={isDeleting}
+      />
     </div>
   );
 }

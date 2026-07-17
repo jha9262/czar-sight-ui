@@ -7,9 +7,7 @@ import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useSerializedItem, useUpdateSerializedItem } from "@/lib/queries";
-import { itemTemplates } from "@/lib/mock/data2";
-import { warehouses } from "@/lib/mock/data";
+import { useStockEditSerializedLogic } from "@/hooks/features/inventory/useStockEditSerializedLogic";
 
 export const Route = createFileRoute("/_app/inventory/stock/edit-serialized/$id")({
   head: () => ({
@@ -20,53 +18,12 @@ export const Route = createFileRoute("/_app/inventory/stock/edit-serialized/$id"
 
 function EditSerializedPage() {
   const { id } = Route.useParams();
-  const navigate = useNavigate();
-  const { data: item, isLoading } = useSerializedItem(id);
-  const updateItem = useUpdateSerializedItem();
-
-  const [template, setTemplate] = useState("");
-  const [warehouse, setWarehouse] = useState("");
-  const [serial, setSerial] = useState("");
-  const [status, setStatus] = useState("");
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
-  useEffect(() => {
-    if (item) {
-      setTemplate(item.template);
-      setWarehouse(item.warehouse);
-      setSerial(item.serial);
-      setStatus(item.status);
-    }
-  }, [item]);
+  const { state, handlers } = useStockEditSerializedLogic(id);
+  const { item, isLoading, template, warehouse, serial, status, errors, itemTemplates, warehouses, isPending } = state;
+  const { setTemplate, setWarehouse, setSerial, setStatus, submit } = handlers;
 
   if (isLoading) return <div className="p-10 text-center">Loading...</div>;
   if (!item) return <div className="p-10 text-center">Item not found</div>;
-
-  function submit() {
-    const e: Record<string, string> = {};
-    if (!template) e.template = "Template is required";
-    if (!warehouse) e.warehouse = "Warehouse is required";
-    if (!serial.trim()) e.serial = "Serial number is required";
-    setErrors(e);
-    if (Object.keys(e).length) return;
-
-    updateItem.mutate(
-      {
-        ...item!,
-        serial,
-        template,
-        warehouse,
-        status: status as any,
-        companyPartCode: itemTemplates.find((t) => t.name === template)?.companyPartCode || item!.companyPartCode,
-      },
-      {
-        onSuccess: () => {
-          toast.success("Serialized item updated");
-          navigate({ to: "/inventory/stock" });
-        },
-      }
-    );
-  }
 
   return (
     <div>
@@ -81,7 +38,7 @@ function EditSerializedPage() {
         description="Update details for a specific serialized item."
       />
 
-      <div className="mx-auto max-w-3xl p-6">
+      <div className="mx-auto max-w-[100%] p-6">
         <Button variant="ghost" size="sm" asChild className="mb-6 -ml-3 text-muted-foreground">
           <Link to="/inventory/stock">
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -111,7 +68,7 @@ function EditSerializedPage() {
               >
                 <option value="" disabled>Select warehouse</option>
                 {warehouses.map((w) => (
-                  <option key={w.id} value={w.code}>{w.code} - {w.title}</option>
+                  <option key={w.id} value={w.code}>{w.code} - {w.name}</option>
                 ))}
               </select>
             </Field>
@@ -144,8 +101,8 @@ function EditSerializedPage() {
             <Button variant="outline" asChild>
               <Link to="/inventory/stock">Cancel</Link>
             </Button>
-            <Button onClick={submit} disabled={updateItem.isPending}>
-              {updateItem.isPending ? "Saving..." : "Save changes"}
+            <Button onClick={submit} disabled={isPending}>
+              {isPending ? "Saving..." : "Save changes"}
             </Button>
           </div>
         </div>

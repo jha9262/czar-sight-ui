@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { StatusBadge } from "@/components/status-badge";
-import { useUser } from "@/lib/queries";
+import { useUserViewLogic } from "@/hooks/features/administration/useUserViewLogic";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export const Route = createFileRoute("/_app/users/$id")({
@@ -14,12 +14,11 @@ export const Route = createFileRoute("/_app/users/$id")({
 
 function UserViewPage() {
   const { id } = Route.useParams();
-  const { data: user, isLoading } = useUser(id);
+  const { state } = useUserViewLogic(id);
+  const { user, isLoading, initials } = state;
 
   if (isLoading) return <div className="p-10 text-center">Loading...</div>;
   if (!user) return <div className="p-10 text-center">User not found</div>;
-
-  const initials = user.name.split(" ").map((n) => n[0]).join("").substring(0, 2).toUpperCase();
 
   return (
     <div>
@@ -32,7 +31,7 @@ function UserViewPage() {
         title={user.name}
         description="View user details."
       />
-      <div className="mx-auto max-w-3xl p-6">
+      <div className="mx-auto max-w-[100%] p-6">
         <Button variant="ghost" size="sm" asChild className="mb-6 -ml-3 text-muted-foreground">
           <Link to="/users">
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -62,7 +61,7 @@ function UserViewPage() {
                 <div>{user.department}</div>
               </Field>
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4">
               <div className="flex items-center justify-between rounded-lg border bg-muted/40 p-4">
                 <div>
@@ -84,7 +83,7 @@ function UserViewPage() {
               </div>
             </div>
           </div>
-          
+
           <div className="mt-8 flex justify-end gap-3 border-t pt-6">
             <Button variant="outline" asChild>
               <Link to={`/users/edit/${user.id}`}>Edit User</Link>

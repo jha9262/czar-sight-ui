@@ -3,8 +3,8 @@ import { ArrowLeft } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { StatusBadge } from "@/components/ui/status-badge";
-import { useItem } from "@/lib/queries";
+import { StatusBadge } from "@/components/status-badge";
+import { useItemViewLogic } from "@/hooks/features/inventory/useItemViewLogic";
 
 export const Route = createFileRoute("/_app/inventory/items/$id")({
   head: () => ({ meta: [{ title: "View Item Template — CZAR Production" }] }),
@@ -13,7 +13,8 @@ export const Route = createFileRoute("/_app/inventory/items/$id")({
 
 function ItemViewPage() {
   const { id } = Route.useParams();
-  const { data: item, isLoading } = useItem(id);
+  const { state } = useItemViewLogic(id);
+  const { item, isLoading } = state;
 
   if (isLoading) return <div className="p-10 text-center">Loading...</div>;
   if (!item) return <div className="p-10 text-center">Item template not found</div>;
@@ -29,7 +30,7 @@ function ItemViewPage() {
         title={item.name}
         description="View item template details."
       />
-      <div className="mx-auto max-w-3xl p-6">
+      <div className="mx-auto max-w-[100%] p-6">
         <Button variant="ghost" size="sm" asChild className="mb-6 -ml-3 text-muted-foreground">
           <Link to="/inventory/items">
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -47,7 +48,7 @@ function ItemViewPage() {
                 <div className="font-mono">{item.companyPartCode}</div>
               </Field>
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4">
               <div className="flex items-center justify-between rounded-lg border bg-muted/40 p-4">
                 <div>
@@ -69,7 +70,7 @@ function ItemViewPage() {
               </div>
             </div>
 
-            {Object.keys(item.attributes).length > 0 && (
+            {item.attributes && Object.keys(item.attributes).length > 0 && (
               <div className="space-y-3 pt-4 border-t">
                 <Label className="text-sm font-semibold">Attributes</Label>
                 <div className="grid gap-2">
@@ -83,7 +84,7 @@ function ItemViewPage() {
               </div>
             )}
           </div>
-          
+
           <div className="mt-8 flex justify-end gap-3 border-t pt-6">
             <Button variant="outline" asChild>
               <Link to={`/inventory/items/edit/${item.id}`}>Edit Item</Link>

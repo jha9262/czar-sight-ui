@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useBlueprint, useUpdateBlueprint, useDispenserModels } from "@/lib/queries";
+import { useBlueprintEditLogic } from "@/hooks/features/bom/useBlueprintEditLogic";
 import { bomTree } from "@/lib/mock/data2";
 
 export const Route = createFileRoute("/_app/product-models/blueprints/edit/$id")({
@@ -16,42 +16,9 @@ export const Route = createFileRoute("/_app/product-models/blueprints/edit/$id")
 
 function EditBlueprintPage() {
   const { id } = Route.useParams();
-  const navigate = useNavigate();
-  const { data: blueprint } = useBlueprint(id);
-  const updateBlueprint = useUpdateBlueprint();
-  const { data: models = [] } = useDispenserModels();
-
-  const [name, setName] = useState("");
-  const [productModelId, setProductModelId] = useState("");
-  const [activeRevision, setActiveRevision] = useState("");
-  const [status, setStatus] = useState("");
-
-  useEffect(() => {
-    if (blueprint) {
-      setName(blueprint.name);
-      setProductModelId(blueprint.productModelId);
-      setActiveRevision(blueprint.activeRevision);
-      setStatus(blueprint.status);
-    }
-  }, [blueprint]);
-
-  const handleSave = () => {
-    if (!blueprint || !name || !productModelId || !activeRevision) {
-      toast.error("Please fill in all required fields.");
-      return;
-    }
-
-    updateBlueprint.mutate(
-      { ...blueprint, name, productModelId, activeRevision, status },
-      {
-        onSuccess: () => {
-          toast.success("Blueprint updated");
-          navigate({ to: "/product-models" });
-        },
-        onError: () => toast.error("Failed to update blueprint"),
-      }
-    );
-  };
+  const { state, handlers } = useBlueprintEditLogic(id);
+  const { blueprint, models, name, productModelId, activeRevision, status, isPending } = state;
+  const { setName, setProductModelId, setActiveRevision, setStatus, handleSave } = handlers;
 
   if (!blueprint) return null;
 
@@ -73,7 +40,7 @@ function EditBlueprintPage() {
                 <ArrowLeft className="mr-1.5 h-4 w-4" /> Cancel
               </Link>
             </Button>
-            <Button size="sm" onClick={handleSave} disabled={updateBlueprint.isPending}>
+            <Button size="sm" onClick={handleSave} disabled={isPending}>
               <Save className="mr-1.5 h-4 w-4" /> Save Changes
             </Button>
           </div>

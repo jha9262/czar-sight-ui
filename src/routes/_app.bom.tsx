@@ -18,8 +18,7 @@ import {
 import { DataTableToolbar } from "@/components/ui/data-table-toolbar";
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
 import { DeleteDialog } from "@/components/delete-dialog";
-import { boms } from "@/lib/mock/data2";
-import { useBomComponentTypes, useDeleteBomComponentType, useBomTemplates } from "@/lib/queries";
+import { useBomIndexLogic } from "@/hooks/features/bom/useBomIndexLogic";
 
 export const Route = createFileRoute("/_app/bom")({
   head: () => ({
@@ -32,24 +31,20 @@ export const Route = createFileRoute("/_app/bom")({
 });
 
 function BomListPage() {
-  const [tab, setTab] = useState("instances");
-  const [q, setQ] = useState("");
-  const { data: componentTypes = [] } = useBomComponentTypes();
-  const { data: templates = [] } = useBomTemplates();
-  const deleteCompType = useDeleteBomComponentType();
-  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
-
-  const filteredInstances = boms.filter((b) =>
-    `${b.name} ${b.duModel}`.toLowerCase().includes(q.toLowerCase()),
-  );
-  
-  const filteredTemplates = templates.filter((t) =>
-    `${t.name} ${t.description}`.toLowerCase().includes(q.toLowerCase()),
-  );
-
-  const filteredCompTypes = componentTypes.filter((c) =>
-    `${c.name} ${c.code}`.toLowerCase().includes(q.toLowerCase()),
-  );
+  const { state, handlers } = useBomIndexLogic();
+  const {
+    tab,
+    q,
+    boms,
+    templates,
+    componentTypes,
+    filteredInstances,
+    filteredTemplates,
+    filteredCompTypes,
+    deleteTarget,
+    isDeleting,
+  } = state;
+  const { setTab, setQ, setDeleteTarget, confirmDeleteCompType } = handlers;
 
   return (
     <div>
@@ -242,7 +237,13 @@ function BomListPage() {
           </TabsContent>
         </Tabs>
       </div>
-      <DeleteDialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)} title="Delete component type?" description="This action cannot be undone." onConfirm={() => { if (deleteTarget) deleteCompType.mutate(deleteTarget, { onSuccess: () => { toast.success("Deleted"); setDeleteTarget(null); } }); }} isPending={deleteCompType.isPending} />
-    </div>
+        <DeleteDialog
+          open={!!deleteTarget}
+          onOpenChange={() => setDeleteTarget(null)}
+          title="Delete component type?"
+          description="This action will permanently remove this component type. Any templates using it will show a warning."
+          onConfirm={confirmDeleteCompType}
+          isPending={isDeleting}
+        /></div>
   );
 }

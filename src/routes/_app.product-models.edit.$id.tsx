@@ -6,8 +6,7 @@ import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { type DispenserModel } from "@/lib/mock/data2";
-import { useDispenserModel, useUpdateDispenserModel } from "@/lib/queries";
+import { useProductModelEditLogic } from "@/hooks/features/bom/useProductModelEditLogic";
 
 export const Route = createFileRoute("/_app/product-models/edit/$id")({
   head: () => ({ meta: [{ title: "Edit Model — CZAR Production" }] }),
@@ -16,31 +15,16 @@ export const Route = createFileRoute("/_app/product-models/edit/$id")({
 
 function ModelEditPage() {
   const { id } = Route.useParams();
-  const navigate = useNavigate();
-  const { data: model, isLoading } = useDispenserModel(id);
-  const updateModel = useUpdateDispenserModel();
-  const [form, setForm] = useState<DispenserModel | null>(null);
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const { state, handlers } = useProductModelEditLogic(id);
+  const { form, errors, isLoading, isPending } = state;
+  const { set, submit } = handlers;
 
-  useEffect(() => { if (model) setForm({ ...model }); }, [model]);
   if (isLoading || !form) return <div className="flex items-center justify-center p-12 text-muted-foreground">Loading…</div>;
-
-  function set<K extends keyof DispenserModel>(k: K, v: DispenserModel[K]) { setForm((f) => f ? { ...f, [k]: v } : f); }
-
-  function submit() {
-    if (!form) return;
-    const e: Record<string, string> = {};
-    if (!form.modelCode.trim()) e.modelCode = "Required";
-    if (!form.modelTitle.trim()) e.modelTitle = "Required";
-    setErrors(e);
-    if (Object.keys(e).length) return;
-    updateModel.mutate(form, { onSuccess: () => { toast.success("Model updated"); navigate({ to: "/product-models" }); } });
-  }
 
   return (
     <div>
       <PageHeader breadcrumbs={[{ label: "Home", to: "/dashboard" }, { label: "Product Models", to: "/product-models" }, { label: `Edit ${form.modelCode}` }]} title={`Edit ${form.modelTitle}`} description="Update dispenser model details." />
-      <div className="mx-auto max-w-3xl p-6">
+      <div className="mx-auto max-w-[100%] p-6">
         <Button variant="ghost" size="sm" asChild className="mb-6 -ml-3 text-muted-foreground"><Link to="/product-models"><ArrowLeft className="mr-2 h-4 w-4" />Back to models</Link></Button>
         <div className="rounded-xl border bg-card p-6 shadow-sm">
           <div className="space-y-6">
@@ -56,7 +40,7 @@ function ModelEditPage() {
           </div>
           <div className="mt-8 flex justify-end gap-3 border-t pt-6">
             <Button variant="outline" asChild><Link to="/product-models">Cancel</Link></Button>
-            <Button onClick={submit}>Save changes</Button>
+            <Button onClick={submit} disabled={isPending}>{isPending ? "Saving..." : "Save changes"}</Button>
           </div>
         </div>
       </div>

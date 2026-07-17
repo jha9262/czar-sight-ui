@@ -9,7 +9,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { DeleteDialog } from "@/components/delete-dialog";
 import { DataTableToolbar } from "@/components/ui/data-table-toolbar";
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
-import { useVendors, useDeleteVendor } from "@/lib/queries";
+import { useVendorsIndexLogic } from "@/hooks/features/sourcing/useVendorsIndexLogic";
 
 export const Route = createFileRoute("/_app/sourcing/vendors/")({
   head: () => ({ meta: [{ title: "Vendors — CZAR Production" }] }),
@@ -17,12 +17,9 @@ export const Route = createFileRoute("/_app/sourcing/vendors/")({
 });
 
 function VendorsPage() {
-  const { data: vendors = [] } = useVendors();
-  const deleteVendor = useDeleteVendor();
-  const [q, setQ] = useState("");
-  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
-
-  const filtered = vendors.filter((v) => `${v.name} ${v.code} ${v.contact}`.toLowerCase().includes(q.toLowerCase()));
+  const { state, handlers } = useVendorsIndexLogic();
+  const { vendors, filtered, q, deleteTarget, isDeleting } = state;
+  const { setQ, setDeleteTarget, confirmDelete } = handlers;
 
   return (
     <div>
@@ -97,7 +94,7 @@ function VendorsPage() {
           <DataTablePagination totalItems={vendors.length} itemsPerPage={filtered.length} itemName="vendors" />
         </div>
       </div>
-      <DeleteDialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)} title="Delete vendor?" description="This vendor will be permanently removed." onConfirm={() => { if (deleteTarget) deleteVendor.mutate(deleteTarget, { onSuccess: () => { toast.success("Vendor deleted"); setDeleteTarget(null); } }); }} isPending={deleteVendor.isPending} />
+      <DeleteDialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)} title="Delete vendor?" description="This action will permanently remove this vendor." onConfirm={confirmDelete} isPending={isDeleting} />
     </div>
   );
 }

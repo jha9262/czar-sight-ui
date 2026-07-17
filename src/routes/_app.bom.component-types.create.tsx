@@ -8,52 +8,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useCreateBomComponentType } from "@/lib/queries";
-import type { BomComponentType } from "@/lib/mock/data2";
+import { useComponentTypeCreateLogic } from "@/hooks/features/bom/useComponentTypeCreateLogic";
 
 export const Route = createFileRoute("/_app/bom/component-types/create")({
   component: CreateComponentTypePage,
 });
 
 function CreateComponentTypePage() {
-  const navigate = useNavigate();
-  const createComponentType = useCreateBomComponentType();
-
-  const [code, setCode] = useState("");
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [properties, setProperties] = useState<{ key: string; dataType: string; requirement: string }[]>([]);
-
-  const addProperty = () => {
-    setProperties([...properties, { key: "", dataType: "String", requirement: "Optional" }]);
-  };
-
-  const removeProperty = (idx: number) => {
-    setProperties(properties.filter((_, i) => i !== idx));
-  };
-
-  const handleSave = () => {
-    if (!code || !name) {
-      toast.error("Code and Name are required.");
-      return;
-    }
-
-    const payload: BomComponentType = {
-      id: "bct" + Date.now(),
-      code,
-      name,
-      description,
-      properties,
-    };
-
-    createComponentType.mutate(payload, {
-      onSuccess: () => {
-        toast.success("Component Type created");
-        navigate({ to: "/bom" });
-      },
-      onError: () => toast.error("Failed to create component type"),
-    });
-  };
+  const { state, handlers } = useComponentTypeCreateLogic();
+  const { code, name, description, properties, isPending } = state;
+  const { setCode, setName, setDescription, addProperty, removeProperty, updateProperty, handleSave } = handlers;
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
@@ -72,7 +36,7 @@ function CreateComponentTypePage() {
                 <ArrowLeft className="mr-1.5 h-4 w-4" /> Cancel
               </Link>
             </Button>
-            <Button size="sm" onClick={handleSave} disabled={createComponentType.isPending}>
+            <Button size="sm" onClick={handleSave} disabled={isPending}>
               <Save className="mr-1.5 h-4 w-4" /> Save
             </Button>
           </div>
@@ -119,11 +83,11 @@ function CreateComponentTypePage() {
                 <div key={idx} className="flex items-center gap-3 rounded-md border p-3">
                   <div className="flex-1 grid gap-2">
                     <Label>Key</Label>
-                    <Input value={prop.key} onChange={(e) => { const np = [...properties]; np[idx].key = e.target.value; setProperties(np); }} placeholder="e.g. Footprint" />
+                    <Input value={prop.key} onChange={(e) => updateProperty(idx, "key", e.target.value)} placeholder="e.g. Footprint" />
                   </div>
                   <div className="w-1/4 grid gap-2">
                     <Label>Data Type</Label>
-                    <Select value={prop.dataType} onValueChange={(v) => { const np = [...properties]; np[idx].dataType = v; setProperties(np); }}>
+                    <Select value={prop.dataType} onValueChange={(v) => updateProperty(idx, "dataType", v)}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -136,7 +100,7 @@ function CreateComponentTypePage() {
                   </div>
                   <div className="w-1/4 grid gap-2">
                     <Label>Requirement</Label>
-                    <Select value={prop.requirement} onValueChange={(v) => { const np = [...properties]; np[idx].requirement = v; setProperties(np); }}>
+                    <Select value={prop.requirement} onValueChange={(v) => updateProperty(idx, "requirement", v)}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>

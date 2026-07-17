@@ -66,7 +66,7 @@ function StockEntryCreatePage() {
         description="Record a new inbound, outbound or transfer movement."
       />
 
-      <div className="mx-auto max-w-3xl p-6">
+      <div className="mx-auto max-w-[100%] p-6">
         <Button variant="ghost" size="sm" asChild className="mb-6 -ml-3 text-muted-foreground">
           <Link to="/stock/entries">
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -89,7 +89,7 @@ function StockEntryCreatePage() {
                 <Input value={form.warehouse} onChange={(e) => set("warehouse", e.target.value)} placeholder="WH-BLR-01" />
               </Field>
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4">
               <Field label="Template">
                 <Select value={form.template} onValueChange={(v) => set("template", v)}>

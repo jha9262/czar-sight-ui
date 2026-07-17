@@ -6,8 +6,7 @@ import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { type Sourcing } from "@/lib/mock/data2";
-import { useSourcing, useUpdateSourcing } from "@/lib/queries";
+import { useSourcingEditLogic } from "@/hooks/features/inventory/useSourcingEditLogic";
 import { Switch } from "@/components/ui/switch";
 
 export const Route = createFileRoute("/_app/inventory/sourcing/edit/$id")({
@@ -17,31 +16,16 @@ export const Route = createFileRoute("/_app/inventory/sourcing/edit/$id")({
 
 function SourcingEditPage() {
   const { id } = Route.useParams();
-  const navigate = useNavigate();
-  const { data: sourcing, isLoading } = useSourcing(id);
-  const updateSourcing = useUpdateSourcing();
-  const [form, setForm] = useState<Sourcing | null>(null);
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const { state, handlers } = useSourcingEditLogic(id);
+  const { form, errors, isLoading } = state;
+  const { set, submit } = handlers;
 
-  useEffect(() => { if (sourcing) setForm({ ...sourcing }); }, [sourcing]);
   if (isLoading || !form) return <div className="flex items-center justify-center p-12 text-muted-foreground">Loading…</div>;
-
-  function set<K extends keyof Sourcing>(k: K, v: Sourcing[K]) { setForm((f) => f ? { ...f, [k]: v } : f); }
-
-  function submit() {
-    if (!form) return;
-    const e: Record<string, string> = {};
-    if (!form.manufacturer.trim()) e.manufacturer = "Required";
-    if (!form.mpn.trim()) e.mpn = "Required";
-    setErrors(e);
-    if (Object.keys(e).length) return;
-    updateSourcing.mutate(form, { onSuccess: () => { toast.success("Sourcing link updated"); navigate({ to: "/inventory/sourcing" }); } });
-  }
 
   return (
     <div>
       <PageHeader breadcrumbs={[{ label: "Home", to: "/dashboard" }, { label: "Sourcing", to: "/inventory/sourcing" }, { label: `Edit ${form.mpn}` }]} title={`Edit Sourcing — ${form.templateName}`} description="Update sourcing link details." />
-      <div className="mx-auto max-w-3xl p-6">
+      <div className="mx-auto max-w-[100%] p-6">
         <Button variant="ghost" size="sm" asChild className="mb-6 -ml-3 text-muted-foreground"><Link to="/inventory/sourcing"><ArrowLeft className="mr-2 h-4 w-4" />Back to sourcing</Link></Button>
         <div className="rounded-xl border bg-card p-6 shadow-sm">
           <div className="space-y-6">

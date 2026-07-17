@@ -23,7 +23,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { bomTree, boms, partMasters, type BomNode } from "@/lib/mock/data2";
+import { partMasters, type BomNode } from "@/lib/mock/data2";
+import { useBomViewLogic, useAddBomItemLogic } from "@/hooks/features/bom/useBomViewLogic";
 
 export const Route = createFileRoute("/_app/bom/$id")({
   head: () => ({
@@ -37,8 +38,9 @@ export const Route = createFileRoute("/_app/bom/$id")({
 
 function BomDetailPage() {
   const { id } = Route.useParams();
-  const bom = boms.find((b) => b.id === id) ?? boms[0];
-  const [open, setOpen] = useState(false);
+  const { state, handlers } = useBomViewLogic(id);
+  const { bom, bomTree, isAddDialogOpen } = state;
+  const { setAddDialogOpen } = handlers;
 
   return (
     <div>
@@ -57,7 +59,7 @@ function BomDetailPage() {
             ) : (
               <StatusBadge tone="warning">Draft</StatusBadge>
             )}
-            <Button size="sm" onClick={() => setOpen(true)}>
+            <Button size="sm" onClick={() => setAddDialogOpen(true)}>
               <Plus className="mr-1.5 h-4 w-4" /> Add BOM item
             </Button>
           </>
@@ -79,7 +81,7 @@ function BomDetailPage() {
         </div>
       </div>
 
-      <AddBomItemDialog open={open} onOpenChange={setOpen} />
+      <AddBomItemDialog open={isAddDialogOpen} onOpenChange={setAddDialogOpen} />
     </div>
   );
 }
@@ -123,15 +125,9 @@ function TreeRow({ node, depth }: { node: BomNode; depth: number }) {
 }
 
 function AddBomItemDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
-  const [part, setPart] = useState("");
-  const [qty, setQty] = useState("");
-  function submit() {
-    if (!part || !qty) return toast.error("Select a part and quantity");
-    toast.success("BOM item added");
-    onOpenChange(false);
-    setPart("");
-    setQty("");
-  }
+  const { state, handlers } = useAddBomItemLogic(onOpenChange);
+  const { part, qty } = state;
+  const { setPart, setQty, submit } = handlers;
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>

@@ -3,8 +3,8 @@ import { ArrowLeft } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { StatusBadge } from "@/components/ui/status-badge";
-import { useVendor } from "@/lib/queries";
+import { StatusBadge } from "@/components/status-badge";
+import { useVendorViewLogic } from "@/hooks/features/sourcing/useVendorViewLogic";
 
 export const Route = createFileRoute("/_app/sourcing/vendors/$id")({
   head: () => ({ meta: [{ title: "View Vendor — CZAR Production" }] }),
@@ -13,7 +13,8 @@ export const Route = createFileRoute("/_app/sourcing/vendors/$id")({
 
 function VendorViewPage() {
   const { id } = Route.useParams();
-  const { data: vendor, isLoading } = useVendor(id);
+  const { state } = useVendorViewLogic(id);
+  const { vendor, isLoading } = state;
 
   if (isLoading) return <div className="p-10 text-center">Loading...</div>;
   if (!vendor) return <div className="p-10 text-center">Vendor not found</div>;
@@ -29,7 +30,7 @@ function VendorViewPage() {
         title={vendor.name}
         description="View vendor details."
       />
-      <div className="mx-auto max-w-3xl p-6">
+      <div className="mx-auto max-w-[100%] p-6">
         <Button variant="ghost" size="sm" asChild className="mb-6 -ml-3 text-muted-foreground">
           <Link to="/sourcing/vendors">
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -47,7 +48,7 @@ function VendorViewPage() {
                 <div className="font-medium">{vendor.name}</div>
               </Field>
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4">
               <Field label="Contact Person">
                 <div>{vendor.contact}</div>
@@ -77,7 +78,7 @@ function VendorViewPage() {
               </StatusBadge>
             </div>
           </div>
-          
+
           <div className="mt-8 flex justify-end gap-3 border-t pt-6">
             <Button variant="outline" asChild>
               <Link to={`/sourcing/vendors/edit/${vendor.code}`}>Edit Vendor</Link>

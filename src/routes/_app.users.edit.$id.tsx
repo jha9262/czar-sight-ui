@@ -6,8 +6,7 @@ import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { type UserRow } from "@/lib/mock/data2";
-import { useUser, useUpdateUser } from "@/lib/queries";
+import { useUserEditLogic } from "@/hooks/features/administration/useUserEditLogic";
 import { Switch } from "@/components/ui/switch";
 
 export const Route = createFileRoute("/_app/users/edit/$id")({
@@ -17,31 +16,16 @@ export const Route = createFileRoute("/_app/users/edit/$id")({
 
 function UserEditPage() {
   const { id } = Route.useParams();
-  const navigate = useNavigate();
-  const { data: user, isLoading } = useUser(id);
-  const updateUser = useUpdateUser();
-  const [form, setForm] = useState<UserRow | null>(null);
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const { state, handlers } = useUserEditLogic(id);
+  const { form, errors, isLoading, isPending } = state;
+  const { set, submit } = handlers;
 
-  useEffect(() => { if (user) setForm({ ...user }); }, [user]);
   if (isLoading || !form) return <div className="flex items-center justify-center p-12 text-muted-foreground">Loading…</div>;
-
-  function set<K extends keyof UserRow>(k: K, v: UserRow[K]) { setForm((f) => f ? { ...f, [k]: v } : f); }
-
-  function submit() {
-    if (!form) return;
-    const e: Record<string, string> = {};
-    if (!form.name.trim()) e.name = "Required";
-    if (!form.email.trim()) e.email = "Required";
-    setErrors(e);
-    if (Object.keys(e).length) return;
-    updateUser.mutate(form, { onSuccess: () => { toast.success("User updated"); navigate({ to: "/users" }); } });
-  }
 
   return (
     <div>
       <PageHeader breadcrumbs={[{ label: "Home", to: "/dashboard" }, { label: "Users", to: "/users" }, { label: `Edit ${form.name}` }]} title={`Edit ${form.name}`} description="Update user account details." />
-      <div className="mx-auto max-w-3xl p-6">
+      <div className="mx-auto max-w-[100%] p-6">
         <Button variant="ghost" size="sm" asChild className="mb-6 -ml-3 text-muted-foreground"><Link to="/users"><ArrowLeft className="mr-2 h-4 w-4" />Back to users</Link></Button>
         <div className="rounded-xl border bg-card p-6 shadow-sm">
           <div className="space-y-6">
@@ -69,7 +53,7 @@ function UserEditPage() {
           </div>
           <div className="mt-8 flex justify-end gap-3 border-t pt-6">
             <Button variant="outline" asChild><Link to="/users">Cancel</Link></Button>
-            <Button onClick={submit}>Save changes</Button>
+            <Button onClick={submit} disabled={isPending}>{isPending ? "Saving..." : "Save changes"}</Button>
           </div>
         </div>
       </div>

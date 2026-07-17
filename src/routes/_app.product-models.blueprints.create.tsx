@@ -7,45 +7,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useCreateBlueprint, useDispenserModels } from "@/lib/queries";
-import type { Blueprint } from "@/lib/mock/data2";
+import { useBlueprintCreateLogic } from "@/hooks/features/bom/useBlueprintCreateLogic";
 
 export const Route = createFileRoute("/_app/product-models/blueprints/create")({
   component: CreateBlueprintPage,
 });
 
 function CreateBlueprintPage() {
-  const navigate = useNavigate();
-  const createBlueprint = useCreateBlueprint();
-  const { data: models = [] } = useDispenserModels();
-
-  const [name, setName] = useState("");
-  const [productModelId, setProductModelId] = useState("");
-  const [activeRevision, setActiveRevision] = useState("v1.0");
-  const [status, setStatus] = useState("Draft");
-
-  const handleSave = () => {
-    if (!name || !productModelId || !activeRevision) {
-      toast.error("Please fill in all required fields.");
-      return;
-    }
-
-    const payload: Blueprint = {
-      id: "bp" + Date.now(),
-      name,
-      productModelId,
-      activeRevision,
-      status,
-    };
-
-    createBlueprint.mutate(payload, {
-      onSuccess: () => {
-        toast.success("Blueprint created successfully");
-        navigate({ to: "/product-models" });
-      },
-      onError: () => toast.error("Failed to create blueprint"),
-    });
-  };
+  const { state, handlers } = useBlueprintCreateLogic();
+  const { models, name, productModelId, activeRevision, status, isPending } = state;
+  const { setName, setProductModelId, setActiveRevision, setStatus, handleSave } = handlers;
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -65,8 +36,9 @@ function CreateBlueprintPage() {
                 <ArrowLeft className="mr-1.5 h-4 w-4" /> Cancel
               </Link>
             </Button>
-            <Button size="sm" onClick={handleSave} disabled={createBlueprint.isPending}>
-              <Save className="mr-1.5 h-4 w-4" /> Create Blueprint
+            <Button onClick={handleSave} disabled={isPending}>
+              <Save className="mr-2 h-4 w-4" />
+              {isPending ? "Saving..." : "Save Blueprint"}
             </Button>
           </div>
         }

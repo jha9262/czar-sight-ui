@@ -9,43 +9,19 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { dispenserModels } from "@/lib/mock/data2";
-import { boms } from "@/lib/mock/data2";
+import { useBomCreateLogic } from "@/hooks/features/bom/useBomCreateLogic";
 
 export const Route = createFileRoute("/_app/bom/create")({ head: () => ({ meta: [{ title: "New BOM — CZAR Production" }] }), component: BomCreatePage });
 
 function BomCreatePage() {
-  const navigate = useNavigate();
-  const [form, setForm] = useState({ name: "", duModel: "", version: "", isActive: true });
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
-  function set<K extends keyof typeof form>(k: K, v: typeof form[K]) { setForm((f) => ({ ...f, [k]: v })); }
-
-  function submit() {
-    const e: Record<string, string> = {};
-    if (!form.name.trim()) e.name = "Required";
-    if (!form.duModel) e.duModel = "Required";
-    if (!form.version.trim()) e.version = "Required";
-    setErrors(e); if (Object.keys(e).length) return;
-    
-    const newBom = {
-      id: crypto.randomUUID(),
-      name: form.name,
-      duModel: form.duModel,
-      version: form.version,
-      itemsCount: 0,
-      updatedAt: new Date().toISOString().slice(0, 10),
-      isActive: form.isActive,
-    };
-    boms.unshift(newBom);
-    
-    toast.success("BOM created");
-    navigate({ to: "/bom" });
-  }
+  const { state, handlers } = useBomCreateLogic();
+  const { form, errors } = state;
+  const { set, submit } = handlers;
 
   return (
     <div>
       <PageHeader breadcrumbs={[{ label: "Home", to: "/dashboard" }, { label: "Bill of Materials", to: "/bom" }, { label: "New" }]} title="New BOM" description="Create a new Bill of Materials version." />
-      <div className="mx-auto max-w-3xl p-6">
+      <div className="mx-auto max-w-[100%] p-6">
         <Button variant="ghost" size="sm" asChild className="mb-6 -ml-3 text-muted-foreground"><Link to="/bom"><ArrowLeft className="mr-2 h-4 w-4" />Back</Link></Button>
         <div className="rounded-xl border bg-card p-6 shadow-sm"><div className="space-y-6">
           <div className="grid grid-cols-2 gap-4">

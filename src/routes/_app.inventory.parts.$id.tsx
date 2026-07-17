@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { usePart, usePartVersions, usePartVariants } from "@/lib/queries";
+import { usePartViewLogic } from "@/hooks/features/inventory/usePartViewLogic";
 
 export const Route = createFileRoute("/_app/inventory/parts/$id")({
   component: PartDetailView,
@@ -12,15 +12,11 @@ export const Route = createFileRoute("/_app/inventory/parts/$id")({
 
 function PartDetailView() {
   const { id } = Route.useParams();
-  const { data: part } = usePart(id);
-  const { data: versions = [] } = usePartVersions();
-  const { data: variants = [] } = usePartVariants();
+  const { state } = usePartViewLogic(id);
+  const { part, partVersions, partVariants, isLoading } = state;
 
-  if (!part) return null;
-
-  const partVersions = versions.filter((v) => v.partMasterId === id);
-  const versionIds = partVersions.map((v) => v.id);
-  const partVariants = variants.filter((v) => versionIds.includes(v.partVersionId));
+  if (isLoading) return <div className="p-10 text-center">Loading...</div>;
+  if (!part) return <div className="p-10 text-center">Part not found</div>;
 
   return (
     <div>

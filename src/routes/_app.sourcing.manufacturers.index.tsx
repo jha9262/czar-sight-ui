@@ -9,7 +9,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { DeleteDialog } from "@/components/delete-dialog";
 import { DataTableToolbar } from "@/components/ui/data-table-toolbar";
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
-import { useManufacturers, useDeleteManufacturer } from "@/lib/queries";
+import { useManufacturersIndexLogic } from "@/hooks/features/sourcing/useManufacturersIndexLogic";
 
 export const Route = createFileRoute("/_app/sourcing/manufacturers/")({
   head: () => ({ meta: [{ title: "Manufacturers — CZAR Production" }] }),
@@ -17,11 +17,9 @@ export const Route = createFileRoute("/_app/sourcing/manufacturers/")({
 });
 
 function ManufacturersPage() {
-  const { data: manufacturers = [] } = useManufacturers();
-  const deleteMfr = useDeleteManufacturer();
-  const [q, setQ] = useState("");
-  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
-  const filtered = manufacturers.filter((m) => `${m.name} ${m.code} ${m.contact}`.toLowerCase().includes(q.toLowerCase()));
+  const { state, handlers } = useManufacturersIndexLogic();
+  const { manufacturers, filtered, q, deleteTarget, isDeleting } = state;
+  const { setQ, setDeleteTarget, confirmDelete } = handlers;
 
   return (
     <div>
@@ -85,7 +83,7 @@ function ManufacturersPage() {
         </div>
       </div>
 
-      <DeleteDialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)} title="Delete manufacturer?" description="This manufacturer will be permanently removed." onConfirm={() => { if (deleteTarget) deleteMfr.mutate(deleteTarget, { onSuccess: () => { toast.success("Manufacturer deleted"); setDeleteTarget(null); } }); }} isPending={deleteMfr.isPending} />
+      <DeleteDialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)} title="Delete manufacturer?" description="This action will permanently remove this manufacturer." onConfirm={confirmDelete} isPending={isDeleting} />
     </div>
   );
 }

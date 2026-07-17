@@ -63,7 +63,7 @@ function StockTemplateCreatePage() {
         description="Define a new schema for stock entries."
       />
 
-      <div className="mx-auto max-w-3xl p-6">
+      <div className="mx-auto max-w-[100%] p-6">
         <Button variant="ghost" size="sm" asChild className="mb-6 -ml-3 text-muted-foreground">
           <Link to="/stock/templates">
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -86,7 +86,7 @@ function StockTemplateCreatePage() {
                 <Input value={form.name} onChange={(e) => set("name", e.target.value)} placeholder="Template Name" />
               </Field>
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4">
               <Field label="Fields Count">
                 <Input type="number" value={form.fields} onChange={(e) => set("fields", parseInt(e.target.value) || 0)} />

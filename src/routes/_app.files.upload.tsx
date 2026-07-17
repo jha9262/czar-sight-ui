@@ -6,27 +6,19 @@ import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useFileUploadLogic } from "@/hooks/features/administration/useFileUploadLogic";
 import { type FileRecord } from "@/lib/mock/data3";
-import { useCreateFile } from "@/lib/queries";
 
 export const Route = createFileRoute("/_app/files/upload")({ head: () => ({ meta: [{ title: "Upload File — CZAR Production" }] }), component: FileUploadPage });
 
 function FileUploadPage() {
-  const navigate = useNavigate();
-  const create = useCreateFile();
-  const [form, setForm] = useState<FileRecord>({ uuid: `F-${crypto.randomUUID().slice(0, 8)}`, filename: "", type: "application/pdf", size: "0 KB", visibility: "PUBLIC", date: new Date().toISOString().slice(0, 10) });
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  function set<K extends keyof FileRecord>(k: K, v: FileRecord[K]) { setForm((f) => ({ ...f, [k]: v })); }
-  function submit() {
-    const e: Record<string, string> = {};
-    if (!form.filename.trim()) e.filename = "Required";
-    setErrors(e); if (Object.keys(e).length) return;
-    create.mutate(form, { onSuccess: () => { toast.success("File uploaded"); navigate({ to: "/files" }); } });
-  }
+  const { state, handlers } = useFileUploadLogic();
+  const { form, errors, isPending } = state;
+  const { set, submit } = handlers;
   return (
     <div>
       <PageHeader breadcrumbs={[{ label: "Home", to: "/dashboard" }, { label: "Files", to: "/files" }, { label: "Upload" }]} title="Upload File" description="Attach a datasheet, firmware binary or engineering drawing." />
-      <div className="mx-auto max-w-3xl p-6">
+      <div className="mx-auto max-w-[100%] p-6">
         <Button variant="ghost" size="sm" asChild className="mb-6 -ml-3 text-muted-foreground"><Link to="/files"><ArrowLeft className="mr-2 h-4 w-4" />Back</Link></Button>
         <div className="rounded-xl border bg-card p-6 shadow-sm"><div className="space-y-6">
           <Field label="Filename" error={errors.filename}><Input value={form.filename} onChange={(e) => set("filename", e.target.value)} placeholder="firmware_v2.5.bin" /></Field>
@@ -43,7 +35,7 @@ function FileUploadPage() {
             <p className="text-sm text-muted-foreground">Drag & drop files here or click to browse</p>
             <p className="mt-1 text-xs text-muted-foreground">(Simulated — fill in the fields above)</p>
           </div>
-        </div><div className="mt-8 flex justify-end gap-3 border-t pt-6"><Button variant="outline" asChild><Link to="/files">Cancel</Link></Button><Button onClick={submit}>Upload file</Button></div></div>
+        </div><div className="mt-8 flex justify-end gap-3 border-t pt-6"><Button variant="outline" asChild><Link to="/files">Cancel</Link></Button><Button onClick={submit} disabled={isPending}>{isPending ? "Uploading..." : "Upload file"}</Button></div></div>
       </div>
     </div>
   );

@@ -19,8 +19,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { DeleteDialog } from "@/components/delete-dialog";
 import { DataTableToolbar } from "@/components/ui/data-table-toolbar";
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
-import { partTypes, partMasters as seed } from "@/lib/mock/data2";
-import { useParts, useDeletePart } from "@/lib/queries";
+import { usePartsIndexLogic } from "@/hooks/features/inventory/usePartsIndexLogic";
 
 export const Route = createFileRoute("/_app/inventory/parts/")({
   head: () => ({
@@ -33,13 +32,9 @@ export const Route = createFileRoute("/_app/inventory/parts/")({
 });
 
 function PartsPage() {
-  const { data: partMasters = [] } = useParts();
-  const deletePart = useDeletePart();
-  const [q, setQ] = useState("");
-  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
-  const filteredMasters = partMasters.filter((p) =>
-    `${p.partNumber} ${p.name} ${p.partType}`.toLowerCase().includes(q.toLowerCase()),
-  );
+  const { state, handlers } = usePartsIndexLogic();
+  const { partMasters, filteredMasters, partTypes, q, deleteTarget, isDeleting } = state;
+  const { setQ, setDeleteTarget, confirmDelete } = handlers;
 
   return (
     <div>
@@ -168,7 +163,7 @@ function PartsPage() {
           </TabsContent>
         </Tabs>
       </div>
-      <DeleteDialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)} title="Delete part?" description="This part master will be permanently removed." onConfirm={() => { if (deleteTarget) deletePart.mutate(deleteTarget, { onSuccess: () => { toast.success("Part deleted"); setDeleteTarget(null); } }); }} isPending={deletePart.isPending} />
+      <DeleteDialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)} title="Delete part master?" description="This action will remove the part master permanently." onConfirm={confirmDelete} isPending={isDeleting} />
     </div>
   );
 }

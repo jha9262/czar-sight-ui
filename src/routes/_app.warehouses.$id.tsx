@@ -3,8 +3,8 @@ import { ArrowLeft } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { StatusBadge } from "@/components/ui/status-badge";
-import { useWarehouse } from "@/lib/queries";
+import { StatusBadge } from "@/components/status-badge";
+import { useWarehouseViewLogic } from "@/hooks/features/administration/useWarehouseViewLogic";
 
 export const Route = createFileRoute("/_app/warehouses/$id")({
   head: () => ({ meta: [{ title: "View Warehouse — CZAR Production" }] }),
@@ -13,7 +13,8 @@ export const Route = createFileRoute("/_app/warehouses/$id")({
 
 function WarehouseViewPage() {
   const { id } = Route.useParams();
-  const { data: warehouse, isLoading } = useWarehouse(id);
+  const { state } = useWarehouseViewLogic(id);
+  const { warehouse, isLoading } = state;
 
   if (isLoading) return <div className="p-10 text-center">Loading...</div>;
   if (!warehouse) return <div className="p-10 text-center">Warehouse not found</div>;
@@ -29,7 +30,7 @@ function WarehouseViewPage() {
         title={warehouse.name}
         description="View warehouse details."
       />
-      <div className="mx-auto max-w-3xl p-6">
+      <div className="mx-auto max-w-[100%] p-6">
         <Button variant="ghost" size="sm" asChild className="mb-6 -ml-3 text-muted-foreground">
           <Link to="/warehouses">
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -47,7 +48,7 @@ function WarehouseViewPage() {
                 <div className="font-medium">{warehouse.name}</div>
               </Field>
             </div>
-            
+
             <Field label="Description">
               <div>{warehouse.description || "—"}</div>
             </Field>
@@ -60,7 +61,7 @@ function WarehouseViewPage() {
                 <div>{warehouse.email || "—"}</div>
               </Field>
             </div>
-            
+
             <div className="rounded-lg border bg-muted/20 p-4 space-y-4">
               <h3 className="text-sm font-medium">Location</h3>
               <div className="grid grid-cols-2 gap-4">
@@ -92,7 +93,7 @@ function WarehouseViewPage() {
               </StatusBadge>
             </div>
           </div>
-          
+
           <div className="mt-8 flex justify-end gap-3 border-t pt-6">
             <Button variant="outline" asChild>
               <Link to={`/warehouses/edit/${warehouse.id}`}>Edit Warehouse</Link>

@@ -9,8 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { type UserRow } from "@/lib/mock/data2";
-import { useCreateUser } from "@/lib/queries";
+import { useUserCreateLogic } from "@/hooks/features/administration/useUserCreateLogic";
 
 export const Route = createFileRoute("/_app/users/create")({
   head: () => ({
@@ -20,39 +19,9 @@ export const Route = createFileRoute("/_app/users/create")({
 });
 
 function UserCreatePage() {
-  const navigate = useNavigate();
-  const createUser = useCreateUser();
-
-  const [form, setForm] = useState<UserRow>({
-    id: crypto.randomUUID(),
-    name: "",
-    email: "",
-    role: "Operator",
-    isActive: true,
-    mfaEnabled: false,
-    lastActive: "just now",
-  });
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
-  function set<K extends keyof UserRow>(k: K, v: UserRow[K]) {
-    setForm((f) => ({ ...f, [k]: v }));
-  }
-
-  function submit() {
-    const e: Record<string, string> = {};
-    if (!form.name.trim()) e.name = "Name is required";
-    if (!form.email.trim()) e.email = "Email is required";
-    else if (!/^\S+@\S+\.\S+$/.test(form.email)) e.email = "Invalid email";
-    setErrors(e);
-    if (Object.keys(e).length) return;
-
-    createUser.mutate(form, {
-      onSuccess: () => {
-        toast.success("User created successfully");
-        navigate({ to: "/users" });
-      },
-    });
-  }
+  const { state, handlers } = useUserCreateLogic();
+  const { form, errors, isPending } = state;
+  const { set, submit } = handlers;
 
   return (
     <div>
@@ -67,7 +36,7 @@ function UserCreatePage() {
         description="Add a new operator, manager, or admin."
       />
 
-      <div className="mx-auto max-w-3xl p-6">
+      <div className="mx-auto max-w-[100%] p-6">
         <Button variant="ghost" size="sm" asChild className="mb-6 -ml-3 text-muted-foreground">
           <Link to="/users">
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -90,7 +59,7 @@ function UserCreatePage() {
                 />
               </Field>
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4">
               <Field label="Role">
                 <Select value={form.role} onValueChange={(v: any) => set("role", v)}>
@@ -128,7 +97,9 @@ function UserCreatePage() {
             <Button variant="outline" asChild>
               <Link to="/users">Cancel</Link>
             </Button>
-            <Button onClick={submit}>Create User</Button>
+            <Button onClick={submit} disabled={isPending}>
+              {isPending ? "Creating..." : "Create User"}
+            </Button>
           </div>
         </div>
       </div>

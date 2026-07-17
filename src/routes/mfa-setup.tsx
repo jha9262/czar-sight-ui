@@ -16,7 +16,7 @@ export const Route = createFileRoute("/mfa-setup")({
   component: MfaSetupPage,
 });
 
-const SECRET = "JBSW Y3DP EHPK 3PXP GEZD MNBV";
+
 
 // Visual QR placeholder — decorative only
 function QrPlaceholder() {
@@ -33,22 +33,12 @@ function QrPlaceholder() {
   );
 }
 
+import { useMfaSetupLogic, SECRET } from "@/hooks/features/auth/useMfaSetupLogic";
+
 function MfaSetupPage() {
-  const [code, setCode] = useState("");
-  const [err, setErr] = useState("");
-  const navigate = useNavigate();
-
-  function verify() {
-    if (code.length !== 6) return setErr("Enter the 6-digit code");
-    setErr("");
-    toast.success("MFA enabled for your account");
-    navigate({ to: "/dashboard" });
-  }
-
-  function copy() {
-    navigator.clipboard.writeText(SECRET.replace(/\s/g, ""));
-    toast.success("Secret copied to clipboard");
-  }
+  const { state, handlers } = useMfaSetupLogic();
+  const { code, err } = state;
+  const { setCode, verify, copy } = handlers;
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted/40 px-4 py-10">

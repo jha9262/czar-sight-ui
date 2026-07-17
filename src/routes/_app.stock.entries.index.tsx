@@ -1,12 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Plus, Search, Pencil, Trash2, ArrowUpDown } from "lucide-react";
-import { useState } from "react";
+import { Plus, Pencil, Trash2, ArrowUpDown } from "lucide-react";
 import { toast } from "sonner";
 
 import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -15,12 +13,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { DeleteDialog } from "@/components/delete-dialog";
 import { DataTableToolbar } from "@/components/ui/data-table-toolbar";
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
-import { stockEntries as seed } from "@/lib/mock/data";
-import { useStockEntries, useDeleteStockEntry } from "@/lib/queries";
+import { useStockEntriesIndexLogic } from "@/hooks/features/stock/useStockEntriesIndexLogic";
+import { stockEntries } from "@/lib/mock/data";
 
 export const Route = createFileRoute("/_app/stock/entries/")({
   head: () => ({
@@ -41,13 +38,9 @@ function fmt(iso: string) {
 }
 
 function StockEntriesPage() {
-  const { data: stockEntries = [] } = useStockEntries();
-  const deleteEntry = useDeleteStockEntry();
-  const [q, setQ] = useState("");
-  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
-  const filtered = stockEntries.filter((e) =>
-    `${e.code} ${e.template} ${e.warehouse} ${e.createdBy}`.toLowerCase().includes(q.toLowerCase()),
-  );
+  const { state, handlers } = useStockEntriesIndexLogic();
+  const { q, filtered, deleteTarget, isDeleting } = state;
+  const { setQ, setDeleteTarget, confirmDelete } = handlers;
 
   return (
     <div>
@@ -134,7 +127,14 @@ function StockEntriesPage() {
           <DataTablePagination totalItems={stockEntries.length} itemsPerPage={filtered.length} itemName="entries" />
         </div>
       </div>
-      <DeleteDialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)} title="Delete stock entry?" description="This entry will be permanently removed." onConfirm={() => { if (deleteTarget) deleteEntry.mutate(deleteTarget, { onSuccess: () => { toast.success("Entry deleted"); setDeleteTarget(null); } }); }} isPending={deleteEntry.isPending} />
+      <DeleteDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
+        title="Delete Stock Entry"
+        description="Are you sure you want to delete this stock entry? This action cannot be undone."
+        onConfirm={confirmDelete}
+        isPending={isDeleting}
+      />
     </div>
   );
 }

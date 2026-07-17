@@ -9,8 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { type Sourcing, itemTemplates } from "@/lib/mock/data2";
-import { useCreateSourcing } from "@/lib/queries";
+import { useSourcingCreateLogic } from "@/hooks/features/inventory/useSourcingCreateLogic";
 
 export const Route = createFileRoute("/_app/inventory/sourcing/create")({
   head: () => ({
@@ -19,42 +18,10 @@ export const Route = createFileRoute("/_app/inventory/sourcing/create")({
   component: SourcingCreatePage,
 });
 
-const manufacturers = ["Delta EMS", "Foxpoint", "Kamoer", "SealTech", "Bossard", "Molex"];
-
 function SourcingCreatePage() {
-  const navigate = useNavigate();
-  const createSourcing = useCreateSourcing();
-
-  const [form, setForm] = useState<Sourcing>({
-    id: crypto.randomUUID(),
-    templateCode: "",
-    templateName: "",
-    manufacturer: "",
-    mpn: "",
-    leadTimeDays: 0,
-    preferred: false,
-  });
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
-  function set<K extends keyof Sourcing>(k: K, v: Sourcing[K]) {
-    setForm((f) => ({ ...f, [k]: v }));
-  }
-
-  function submit() {
-    const e: Record<string, string> = {};
-    if (!form.templateCode.trim()) e.templateCode = "Template is required";
-    if (!form.manufacturer.trim()) e.manufacturer = "Manufacturer is required";
-    if (!form.mpn.trim()) e.mpn = "MPN is required";
-    setErrors(e);
-    if (Object.keys(e).length) return;
-
-    createSourcing.mutate(form, {
-      onSuccess: () => {
-        toast.success("Manufacturer linked to template");
-        navigate({ to: "/inventory/sourcing" });
-      },
-    });
-  }
+  const { state, handlers } = useSourcingCreateLogic();
+  const { form, errors, itemTemplates, manufacturers } = state;
+  const { set, submit } = handlers;
 
   return (
     <div>
@@ -69,7 +36,7 @@ function SourcingCreatePage() {
         description="Attach a manufacturer and MPN to an existing item template."
       />
 
-      <div className="mx-auto max-w-3xl p-6">
+      <div className="mx-auto max-w-[100%] p-6">
         <Button variant="ghost" size="sm" asChild className="mb-6 -ml-3 text-muted-foreground">
           <Link to="/inventory/sourcing">
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -83,11 +50,7 @@ function SourcingCreatePage() {
               <Field label="Item Template" error={errors.templateCode}>
                 <Select
                   value={form.templateCode}
-                  onValueChange={(v) => {
-                    const tpl = itemTemplates.find((t) => t.companyPartCode === v);
-                    set("templateCode", v);
-                    set("templateName", tpl?.name || "");
-                  }}
+                  onValueChange={(v) => set("templateCode", v)}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select template" />
@@ -117,7 +80,7 @@ function SourcingCreatePage() {
                 </Select>
               </Field>
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4">
               <Field label="Manufacturer Part Number (MPN)" error={errors.mpn}>
                 <Input value={form.mpn} onChange={(e) => set("mpn", e.target.value.toUpperCase())} placeholder="MFR-XYZ-123" className="font-mono" />

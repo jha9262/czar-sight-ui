@@ -7,8 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { type ItemTemplate } from "@/lib/mock/data2";
-import { useItem, useUpdateItem } from "@/lib/queries";
+import { useItemEditLogic } from "@/hooks/features/inventory/useItemEditLogic";
 
 export const Route = createFileRoute("/_app/inventory/items/edit/$id")({
   head: () => ({ meta: [{ title: "Edit Item Template — CZAR Production" }] }),
@@ -17,31 +16,16 @@ export const Route = createFileRoute("/_app/inventory/items/edit/$id")({
 
 function ItemEditPage() {
   const { id } = Route.useParams();
-  const navigate = useNavigate();
-  const { data: item, isLoading } = useItem(id);
-  const updateItem = useUpdateItem();
-  const [form, setForm] = useState<ItemTemplate | null>(null);
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const { state, handlers } = useItemEditLogic(id);
+  const { form, errors, isLoading } = state;
+  const { set, submit } = handlers;
 
-  useEffect(() => { if (item) setForm({ ...item }); }, [item]);
   if (isLoading || !form) return <div className="flex items-center justify-center p-12 text-muted-foreground">Loading…</div>;
-
-  function set<K extends keyof ItemTemplate>(k: K, v: ItemTemplate[K]) { setForm((f) => f ? { ...f, [k]: v } : f); }
-
-  function submit() {
-    if (!form) return;
-    const e: Record<string, string> = {};
-    if (!form.name.trim()) e.name = "Required";
-    if (!form.companyPartCode.trim()) e.companyPartCode = "Required";
-    setErrors(e);
-    if (Object.keys(e).length) return;
-    updateItem.mutate(form, { onSuccess: () => { toast.success("Item template updated"); navigate({ to: "/inventory/items" }); } });
-  }
 
   return (
     <div>
       <PageHeader breadcrumbs={[{ label: "Home", to: "/dashboard" }, { label: "Item Templates", to: "/inventory/items" }, { label: `Edit ${form.companyPartCode}` }]} title={`Edit ${form.name}`} description="Update item template details." />
-      <div className="mx-auto max-w-3xl p-6">
+      <div className="mx-auto max-w-[100%] p-6">
         <Button variant="ghost" size="sm" asChild className="mb-6 -ml-3 text-muted-foreground"><Link to="/inventory/items"><ArrowLeft className="mr-2 h-4 w-4" />Back to items</Link></Button>
         <div className="rounded-xl border bg-card p-6 shadow-sm">
           <div className="space-y-6">

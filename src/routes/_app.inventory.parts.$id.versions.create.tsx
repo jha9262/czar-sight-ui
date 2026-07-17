@@ -7,8 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { usePart, useCreatePartVersion } from "@/lib/queries";
-import type { PartVersion } from "@/lib/mock/data2";
+import { usePartVersionCreateLogic } from "@/hooks/features/inventory/usePartVersionCreateLogic";
 
 export const Route = createFileRoute("/_app/inventory/parts/$id/versions/create")({
   component: CreateVersionPage,
@@ -16,34 +15,9 @@ export const Route = createFileRoute("/_app/inventory/parts/$id/versions/create"
 
 function CreateVersionPage() {
   const { id } = Route.useParams();
-  const navigate = useNavigate();
-  const { data: part } = usePart(id);
-  const createVersion = useCreatePartVersion();
-
-  const [versionLabel, setVersionLabel] = useState("");
-  const [changelog, setChangelog] = useState("");
-
-  const handleSave = () => {
-    if (!versionLabel) {
-      toast.error("Version label is required.");
-      return;
-    }
-
-    const payload: PartVersion = {
-      id: "pv" + Date.now(),
-      partMasterId: id,
-      versionLabel,
-      changelog,
-    };
-
-    createVersion.mutate(payload, {
-      onSuccess: () => {
-        toast.success("Version created successfully");
-        navigate({ to: `/inventory/parts/${id}` });
-      },
-      onError: () => toast.error("Failed to create version"),
-    });
-  };
+  const { state, handlers } = usePartVersionCreateLogic(id);
+  const { part, versionLabel, changelog } = state;
+  const { setVersionLabel, setChangelog, handleSave } = handlers;
 
   if (!part) return null;
 

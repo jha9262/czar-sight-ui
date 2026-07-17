@@ -9,7 +9,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { DeleteDialog } from "@/components/delete-dialog";
 import { DataTableToolbar } from "@/components/ui/data-table-toolbar";
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
-import { useCompanies, useDeleteCompany } from "@/lib/queries";
+import { useCompaniesIndexLogic } from "@/hooks/features/sourcing/useCompaniesIndexLogic";
 
 export const Route = createFileRoute("/_app/companies/")({
   head: () => ({ meta: [{ title: "Companies — CZAR Production" }] }),
@@ -17,11 +17,9 @@ export const Route = createFileRoute("/_app/companies/")({
 });
 
 function CompaniesPage() {
-  const { data: companies = [] } = useCompanies();
-  const deleteCompany = useDeleteCompany();
-  const [q, setQ] = useState("");
-  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
-  const filtered = companies.filter((c) => `${c.title} ${c.code}`.toLowerCase().includes(q.toLowerCase()));
+  const { state, handlers } = useCompaniesIndexLogic();
+  const { companies, filtered, q, deleteTarget, isDeleting } = state;
+  const { setQ, setDeleteTarget, confirmDelete } = handlers;
 
   return (
     <div>
@@ -81,7 +79,7 @@ function CompaniesPage() {
         </div>
       </div>
 
-      <DeleteDialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)} title="Delete company?" description="This company will be permanently removed." onConfirm={() => { if (deleteTarget) deleteCompany.mutate(deleteTarget, { onSuccess: () => { toast.success("Company deleted"); setDeleteTarget(null); } }); }} isPending={deleteCompany.isPending} />
+      <DeleteDialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)} title="Delete company?" description="This action will permanently remove this company." onConfirm={confirmDelete} isPending={isDeleting} />
     </div>
   );
 }

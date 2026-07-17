@@ -6,9 +6,7 @@ import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { type PartMaster } from "@/lib/mock/data2";
-import { usePart, useUpdatePart } from "@/lib/queries";
-import { partTypes } from "@/lib/mock/data2";
+import { usePartEditLogic } from "@/hooks/features/inventory/usePartEditLogic";
 
 export const Route = createFileRoute("/_app/inventory/parts/edit/$id")({
   head: () => ({ meta: [{ title: "Edit Part — CZAR Production" }] }),
@@ -17,32 +15,16 @@ export const Route = createFileRoute("/_app/inventory/parts/edit/$id")({
 
 function PartEditPage() {
   const { id } = Route.useParams();
-  const navigate = useNavigate();
-  const { data: part, isLoading } = usePart(id);
-  const updatePart = useUpdatePart();
-  const [form, setForm] = useState<PartMaster | null>(null);
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const { state, handlers } = usePartEditLogic(id);
+  const { form, errors, isLoading, partTypes } = state;
+  const { set, submit } = handlers;
 
-  useEffect(() => { if (part) setForm({ ...part }); }, [part]);
   if (isLoading || !form) return <div className="flex items-center justify-center p-12 text-muted-foreground">Loading…</div>;
-
-  function set<K extends keyof PartMaster>(k: K, v: PartMaster[K]) { setForm((f) => f ? { ...f, [k]: v } : f); }
-
-  function submit() {
-    if (!form) return;
-    const e: Record<string, string> = {};
-    if (!form.partNumber.trim()) e.partNumber = "Required";
-    if (!form.name.trim()) e.name = "Required";
-    if (!form.partType) e.partType = "Required";
-    setErrors(e);
-    if (Object.keys(e).length) return;
-    updatePart.mutate(form, { onSuccess: () => { toast.success("Part updated"); navigate({ to: "/inventory/parts" }); } });
-  }
 
   return (
     <div>
       <PageHeader breadcrumbs={[{ label: "Home", to: "/dashboard" }, { label: "Parts", to: "/inventory/parts" }, { label: `Edit ${form.partNumber}` }]} title={`Edit ${form.name}`} description="Update part master details." />
-      <div className="mx-auto max-w-3xl p-6">
+      <div className="mx-auto max-w-[100%] p-6">
         <Button variant="ghost" size="sm" asChild className="mb-6 -ml-3 text-muted-foreground"><Link to="/inventory/parts"><ArrowLeft className="mr-2 h-4 w-4" />Back to parts</Link></Button>
         <div className="rounded-xl border bg-card p-6 shadow-sm">
           <div className="space-y-6">

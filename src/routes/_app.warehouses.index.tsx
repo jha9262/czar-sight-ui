@@ -28,7 +28,7 @@ import {
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { DeleteDialog } from "@/components/delete-dialog";
 import { warehouses as seed, type Warehouse } from "@/lib/mock/data";
-import { useWarehouses, useUpdateWarehouse, useDeleteWarehouse } from "@/lib/queries";
+import { useWarehousesIndexLogic } from "@/hooks/features/administration/useWarehousesIndexLogic";
 
 export const Route = createFileRoute("/_app/warehouses/")({
   head: () => ({
@@ -43,32 +43,9 @@ export const Route = createFileRoute("/_app/warehouses/")({
 const PAGE_SIZE = 5;
 
 function WarehousesPage() {
-  const { data: rows = [], isLoading } = useWarehouses();
-  const updateWarehouse = useUpdateWarehouse();
-  const deleteWarehouse = useDeleteWarehouse();
-  
-  const [query, setQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all");
-  const [cityFilter, setCityFilter] = useState<string>("all");
-  const [page, setPage] = useState(1);
-  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
-
-  const cities = useMemo(() => Array.from(new Set(rows.map((r) => r.city))), [rows]);
-
-  const filtered = useMemo(() => {
-    return rows.filter((r) => {
-      if (statusFilter === "active" && !r.isActive) return false;
-      if (statusFilter === "inactive" && r.isActive) return false;
-      if (cityFilter !== "all" && r.city !== cityFilter) return false;
-      if (query && !`${r.code} ${r.name} ${r.email}`.toLowerCase().includes(query.toLowerCase()))
-        return false;
-      return true;
-    });
-  }, [rows, query, statusFilter, cityFilter]);
-
-  const total = filtered.length;
-  const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  const view = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const { state, handlers } = useWarehousesIndexLogic();
+  const { query, statusFilter, cityFilter, page, deleteTarget, cities, view, total, pages, isDeleting } = state;
+  const { setQuery, setStatusFilter, setCityFilter, setPage, setDeleteTarget, confirmDelete } = handlers;
   function toggleActive(id: string) {
     const warehouse = rows.find(r => r.id === id);
     if (warehouse) {
@@ -246,7 +223,14 @@ function WarehousesPage() {
         </div>
       </div>
 
-      <DeleteDialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)} title="Delete warehouse?" description="This warehouse will be permanently removed." onConfirm={() => { if (deleteTarget) deleteWarehouse.mutate(deleteTarget, { onSuccess: () => { toast.success("Warehouse deleted"); setDeleteTarget(null); } }); }} isPending={deleteWarehouse.isPending} />
+      <DeleteDialog
+        open={!!deleteTarget}
+        onOpenChange={() => setDeleteTarget(null)}
+        title="Delete warehouse?"
+        description="This warehouse will be permanently removed."
+        onConfirm={confirmDelete}
+        isPending={isDeleting}
+      />
     </div>
   );
 }

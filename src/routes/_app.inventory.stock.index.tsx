@@ -20,8 +20,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { DeleteDialog } from "@/components/delete-dialog";
 import { DataTableToolbar } from "@/components/ui/data-table-toolbar";
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
-import { warehouses } from "@/lib/mock/data";
-import { useSerializedItems, useBulkItems, useDeleteSerializedItem, useDeleteBulkItem } from "@/lib/queries";
+import { useStockIndexLogic } from "@/hooks/features/inventory/useStockIndexLogic";
 
 export const Route = createFileRoute("/_app/inventory/stock/")({
   head: () => ({
@@ -49,20 +48,9 @@ function statusTone(s: string) {
 }
 
 function StockPage() {
-  const [tab, setTab] = useState<"serialized" | "bulk">("serialized");
-  const [query, setQuery] = useState("");
-  const { data: serializedItems = [] } = useSerializedItems();
-  const { data: bulkItems = [] } = useBulkItems();
-  const deleteSerialized = useDeleteSerializedItem();
-  const deleteBulk = useDeleteBulkItem();
-  const [deleteTarget, setDeleteTarget] = useState<{ id: string, type: "serialized" | "bulk" } | null>(null);
-
-  const filteredSer = serializedItems.filter((i) =>
-    `${i.serial} ${i.template} ${i.companyPartCode}`.toLowerCase().includes(query.toLowerCase()),
-  );
-  const filteredBulk = bulkItems.filter((i) =>
-    `${i.batchNumber} ${i.template} ${i.companyPartCode}`.toLowerCase().includes(query.toLowerCase()),
-  );
+  const { state, handlers } = useStockIndexLogic();
+  const { tab, query, serializedItems, bulkItems, filteredSer, filteredBulk, deleteTarget, warehouses, isDeleting } = state;
+  const { setTab, setQuery, setDeleteTarget, confirmDelete } = handlers;
 
   return (
     <div>
@@ -178,7 +166,7 @@ function StockPage() {
                   ))}
                 </TableBody>
               </Table>
-              <DataTablePagination totalItems={stockSerialized.length} itemsPerPage={filteredSer.length} itemName="serialized items" />
+              <DataTablePagination totalItems={serializedItems.length} itemsPerPage={filteredSer.length} itemName="serialized items" />
             </div>
           </TabsContent>
 
@@ -243,16 +231,12 @@ function StockPage() {
                   ))}
                 </TableBody>
               </Table>
-              <DataTablePagination totalItems={stockBulk.length} itemsPerPage={filteredBulk.length} itemName="bulk items" />
+              <DataTablePagination totalItems={bulkItems.length} itemsPerPage={filteredBulk.length} itemName="bulk items" />
             </div>
           </TabsContent>
         </Tabs>
       </div>
-      <DeleteDialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)} title="Delete stock?" description="This stock record will be removed." onConfirm={() => {
-        if (!deleteTarget) return;
-        const fn = deleteTarget.type === "serialized" ? deleteSerialized : deleteBulk;
-        fn.mutate(deleteTarget.id, { onSuccess: () => { toast.success("Stock deleted"); setDeleteTarget(null); } });
-      }} isPending={deleteSerialized.isPending || deleteBulk.isPending} />
+      <DeleteDialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)} title="Delete item?" description="This action will permanently remove this stock record." onConfirm={confirmDelete} isPending={isDeleting} />
     </div>
   );
 }

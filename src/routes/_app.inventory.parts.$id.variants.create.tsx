@@ -8,8 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { usePart, usePartVersions, useCreatePartVariant } from "@/lib/queries";
-import type { PartVariant } from "@/lib/mock/data2";
+import { usePartVariantCreateLogic } from "@/hooks/features/inventory/usePartVariantCreateLogic";
 
 export const Route = createFileRoute("/_app/inventory/parts/$id/variants/create")({
   component: CreateVariantPage,
@@ -17,38 +16,9 @@ export const Route = createFileRoute("/_app/inventory/parts/$id/variants/create"
 
 function CreateVariantPage() {
   const { id } = Route.useParams();
-  const navigate = useNavigate();
-  const { data: part } = usePart(id);
-  const { data: versions = [] } = usePartVersions();
-  const createVariant = useCreatePartVariant();
-
-  const partVersions = versions.filter((v) => v.partMasterId === id);
-
-  const [partVersionId, setPartVersionId] = useState("");
-  const [variantName, setVariantName] = useState("");
-  const [specifications, setSpecifications] = useState("");
-
-  const handleSave = () => {
-    if (!partVersionId || !variantName) {
-      toast.error("Version and Variant Name are required.");
-      return;
-    }
-
-    const payload: PartVariant = {
-      id: "pva" + Date.now(),
-      partVersionId,
-      variantName,
-      specifications,
-    };
-
-    createVariant.mutate(payload, {
-      onSuccess: () => {
-        toast.success("Variant created successfully");
-        navigate({ to: `/inventory/parts/${id}` });
-      },
-      onError: () => toast.error("Failed to create variant"),
-    });
-  };
+  const { state, handlers } = usePartVariantCreateLogic(id);
+  const { part, partVersions, partVersionId, variantName, specifications } = state;
+  const { setPartVersionId, setVariantName, setSpecifications, handleSave } = handlers;
 
   if (!part) return null;
 

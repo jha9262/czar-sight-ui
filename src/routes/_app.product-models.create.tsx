@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { type DispenserModel } from "@/lib/mock/data2";
-import { useCreateDispenserModel } from "@/lib/queries";
+import { useProductModelCreateLogic } from "@/hooks/features/bom/useProductModelCreateLogic";
 
 export const Route = createFileRoute("/_app/product-models/create")({
   head: () => ({
@@ -20,38 +20,9 @@ export const Route = createFileRoute("/_app/product-models/create")({
 });
 
 function ProductModelCreatePage() {
-  const navigate = useNavigate();
-  const createModel = useCreateDispenserModel();
-
-  const [form, setForm] = useState<ProductModel>({
-    id: crypto.randomUUID(),
-    code: "",
-    name: "",
-    description: "",
-    category: "Standard",
-    msrp: 0,
-    status: "active",
-  });
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
-  function set<K extends keyof ProductModel>(k: K, v: ProductModel[K]) {
-    setForm((f) => ({ ...f, [k]: v }));
-  }
-
-  function submit() {
-    const e: Record<string, string> = {};
-    if (!form.code.trim()) e.code = "Code is required";
-    if (!form.name.trim()) e.name = "Name is required";
-    setErrors(e);
-    if (Object.keys(e).length) return;
-
-    createModel.mutate(form, {
-      onSuccess: () => {
-        toast.success("Product model created");
-        navigate({ to: "/product-models" });
-      },
-    });
-  }
+  const { state, handlers } = useProductModelCreateLogic();
+  const { form, errors, isPending } = state;
+  const { set, submit } = handlers;
 
   return (
     <div>
@@ -66,7 +37,7 @@ function ProductModelCreatePage() {
         description="Define a top-level manufacturable product."
       />
 
-      <div className="mx-auto max-w-3xl p-6">
+      <div className="mx-auto max-w-[100%] p-6">
         <Button variant="ghost" size="sm" asChild className="mb-6 -ml-3 text-muted-foreground">
           <Link to="/product-models">
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -89,7 +60,7 @@ function ProductModelCreatePage() {
                 <Input value={form.name} onChange={(e) => set("name", e.target.value)} placeholder="Model Name" />
               </Field>
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4">
               <Field label="Category">
                 <Select value={form.category} onValueChange={(v) => set("category", v)}>
@@ -130,7 +101,9 @@ function ProductModelCreatePage() {
             <Button variant="outline" asChild>
               <Link to="/product-models">Cancel</Link>
             </Button>
-            <Button onClick={submit}>Create Product Model</Button>
+            <Button onClick={submit} disabled={isPending}>
+              {isPending ? "Creating..." : "Create Product Model"}
+            </Button>
           </div>
         </div>
       </div>

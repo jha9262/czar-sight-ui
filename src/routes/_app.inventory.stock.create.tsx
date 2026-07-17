@@ -7,9 +7,7 @@ import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useCreateSerializedItem, useCreateBulkItem } from "@/lib/queries";
-import { itemTemplates } from "@/lib/mock/data2";
-import { warehouses } from "@/lib/mock/data";
+import { useStockCreateLogic } from "@/hooks/features/inventory/useStockCreateLogic";
 
 export const Route = createFileRoute("/_app/inventory/stock/create")({
   head: () => ({
@@ -19,69 +17,9 @@ export const Route = createFileRoute("/_app/inventory/stock/create")({
 });
 
 function StockCreatePage() {
-  const navigate = useNavigate();
-  const createSerialized = useCreateSerializedItem();
-  const createBulk = useCreateBulkItem();
-
-  const [isSerialized, setIsSerialized] = useState(true);
-  const [template, setTemplate] = useState("");
-  const [warehouse, setWarehouse] = useState("");
-  const [serial, setSerial] = useState("");
-  const [batch, setBatch] = useState("");
-  const [qty, setQty] = useState("");
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
-  function submit() {
-    const e: Record<string, string> = {};
-    if (!template) e.template = "Template is required";
-    if (!warehouse) e.warehouse = "Warehouse is required";
-    if (isSerialized) {
-      if (!serial.trim()) e.serial = "Serial number is required";
-    } else {
-      if (!batch.trim()) e.batch = "Batch number is required";
-      if (!qty || Number(qty) <= 0) e.qty = "Enter a positive quantity";
-    }
-    setErrors(e);
-    if (Object.keys(e).length) return;
-
-    if (isSerialized) {
-      createSerialized.mutate(
-        {
-          id: crypto.randomUUID(),
-          serial: serial,
-          template: template,
-          companyPartCode: itemTemplates.find((t) => t.name === template)?.companyPartCode || "CZR-UNKNOWN",
-          warehouse: warehouse,
-          status: "in_stock",
-          receivedAt: new Date().toISOString().slice(0, 10),
-        },
-        {
-          onSuccess: () => {
-            toast.success("Serialized item added");
-            navigate({ to: "/inventory/stock" });
-          },
-        }
-      );
-    } else {
-      createBulk.mutate(
-        {
-          id: crypto.randomUUID(),
-          batchNumber: batch,
-          template: template,
-          companyPartCode: itemTemplates.find((t) => t.name === template)?.companyPartCode || "CZR-UNKNOWN",
-          warehouse: warehouse,
-          quantity: Number(qty),
-          receivedAt: new Date().toISOString().slice(0, 10),
-        },
-        {
-          onSuccess: () => {
-            toast.success("Bulk batch added");
-            navigate({ to: "/inventory/stock" });
-          },
-        }
-      );
-    }
-  }
+  const { state, handlers } = useStockCreateLogic();
+  const { isSerialized, template, warehouse, serial, batch, qty, errors, itemTemplates, warehouses } = state;
+  const { setIsSerialized, setTemplate, setWarehouse, setSerial, setBatch, setQty, submit } = handlers;
 
   return (
     <div>
@@ -96,7 +34,7 @@ function StockCreatePage() {
         description="Add serialized instances or bulk inventory batches."
       />
 
-      <div className="mx-auto max-w-3xl p-6">
+      <div className="mx-auto max-w-[100%] p-6">
         <Button variant="ghost" size="sm" asChild className="mb-6 -ml-3 text-muted-foreground">
           <Link to="/inventory/stock">
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -104,7 +42,7 @@ function StockCreatePage() {
           </Link>
         </Button>
 
-        <div className="rounded-xl border bg-card p-6 shadow-sm">
+        <div className="rounded-xl border bg-card p-6 max-w-[100%] shadow-sm">
           <div className="mb-8 flex items-center gap-2 rounded-md border p-1 text-sm">
             <button
               onClick={() => setIsSerialized(true)}
@@ -146,7 +84,7 @@ function StockCreatePage() {
                 >
                   <option value="" disabled>Select warehouse</option>
                   {warehouses.map((w) => (
-                    <option key={w.id} value={w.code}>{w.code} - {w.title}</option>
+                    <option key={w.id} value={w.code}>{w.code} - {w.name}</option>
                   ))}
                 </select>
               </Field>

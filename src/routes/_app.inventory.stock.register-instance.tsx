@@ -7,53 +7,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useItems, useWarehouses, useCreateSerializedItem } from "@/lib/queries";
-import type { SerializedItem } from "@/lib/mock/data";
+import { useStockRegisterInstanceLogic } from "@/hooks/features/inventory/useStockRegisterInstanceLogic";
 
 export const Route = createFileRoute("/_app/inventory/stock/register-instance")({
   component: RegisterInstancePage,
 });
 
 function RegisterInstancePage() {
-  const navigate = useNavigate();
-  const createItem = useCreateSerializedItem();
-  const { data: templates = [] } = useItems();
-  const { data: warehouses = [] } = useWarehouses();
-
-  const [itemTemplateId, setItemTemplateId] = useState("");
-  const [serial, setSerial] = useState("");
-  const [warehouseId, setWarehouseId] = useState("");
-  const [status, setStatus] = useState<"in_stock" | "reserved" | "shipped" | "faulty">("in_stock");
-
-  const handleSave = () => {
-    if (!itemTemplateId || !serial || !warehouseId) {
-      toast.error("Please fill in all required fields.");
-      return;
-    }
-
-    const template = templates.find((t) => t.id === itemTemplateId);
-    const warehouse = warehouses.find((w) => w.id === warehouseId);
-    
-    if (!template || !warehouse) return;
-
-    const payload: SerializedItem = {
-      id: "ser" + Date.now(),
-      template: template.name,
-      companyPartCode: template.companyPartCode,
-      serial,
-      warehouse: warehouse.name,
-      status,
-      attributes: template.attributes,
-    };
-
-    createItem.mutate(payload, {
-      onSuccess: () => {
-        toast.success("Instance registered successfully");
-        navigate({ to: "/inventory/stock" });
-      },
-      onError: () => toast.error("Failed to register instance"),
-    });
-  };
+  const { state, handlers } = useStockRegisterInstanceLogic();
+  const { templates, warehouses, itemTemplateId, serial, warehouseId, status, isPending } = state;
+  const { setItemTemplateId, setSerial, setWarehouseId, setStatus, handleSave } = handlers;
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
@@ -73,7 +36,7 @@ function RegisterInstancePage() {
                 <ArrowLeft className="mr-1.5 h-4 w-4" /> Cancel
               </Link>
             </Button>
-            <Button size="sm" onClick={handleSave} disabled={createItem.isPending}>
+            <Button size="sm" onClick={handleSave} disabled={isPending}>
               <Save className="mr-1.5 h-4 w-4" /> Register
             </Button>
           </div>

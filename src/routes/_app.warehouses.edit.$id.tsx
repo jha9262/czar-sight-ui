@@ -9,8 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { type Warehouse } from "@/lib/mock/data";
-import { useWarehouse, useUpdateWarehouse } from "@/lib/queries";
+import { useWarehouseEditLogic } from "@/hooks/features/administration/useWarehouseEditLogic";
 
 export const Route = createFileRoute("/_app/warehouses/edit/$id")({
   head: () => ({ meta: [{ title: "Edit Warehouse — CZAR Production" }] }),
@@ -19,40 +18,11 @@ export const Route = createFileRoute("/_app/warehouses/edit/$id")({
 
 function WarehouseEditPage() {
   const { id } = Route.useParams();
-  const navigate = useNavigate();
-  const { data: warehouse, isLoading } = useWarehouse(id);
-  const updateWarehouse = useUpdateWarehouse();
-
-  const [form, setForm] = useState<Warehouse | null>(null);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
-  useEffect(() => {
-    if (warehouse) setForm({ ...warehouse });
-  }, [warehouse]);
+  const { state, handlers } = useWarehouseEditLogic(id);
+  const { form, errors, isLoading, isPending } = state;
+  const { set, submit } = handlers;
 
   if (isLoading || !form) return <div className="flex items-center justify-center p-12 text-muted-foreground">Loading…</div>;
-
-  function set<K extends keyof Warehouse>(k: K, v: Warehouse[K]) {
-    setForm((f) => f ? { ...f, [k]: v } : f);
-  }
-
-  function submit() {
-    if (!form) return;
-    const e: Record<string, string> = {};
-    if (!form.code.trim()) e.code = "Code is required";
-    if (!form.name.trim()) e.name = "Name is required";
-    if (!form.email.trim()) e.email = "Email is required";
-    if (!form.city.trim()) e.city = "City is required";
-    setErrors(e);
-    if (Object.keys(e).length) return;
-
-    updateWarehouse.mutate(form, {
-      onSuccess: () => {
-        toast.success("Warehouse updated");
-        navigate({ to: "/warehouses" });
-      },
-    });
-  }
 
   return (
     <div>
@@ -65,7 +35,7 @@ function WarehouseEditPage() {
         title={`Edit ${form.name}`}
         description="Update warehouse details."
       />
-      <div className="mx-auto max-w-3xl p-6">
+      <div className="mx-auto max-w-[100%] p-6">
         <Button variant="ghost" size="sm" asChild className="mb-6 -ml-3 text-muted-foreground">
           <Link to="/warehouses"><ArrowLeft className="mr-2 h-4 w-4" />Back to warehouses</Link>
         </Button>
@@ -94,7 +64,7 @@ function WarehouseEditPage() {
           </div>
           <div className="mt-8 flex justify-end gap-3 border-t pt-6">
             <Button variant="outline" asChild><Link to="/warehouses">Cancel</Link></Button>
-            <Button onClick={submit}>Save changes</Button>
+            <Button onClick={submit} disabled={isPending}>{isPending ? "Saving..." : "Save changes"}</Button>
           </div>
         </div>
       </div>

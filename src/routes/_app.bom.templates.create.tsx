@@ -7,61 +7,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useCreateBomTemplate } from "@/lib/queries";
-import type { BomTemplate } from "@/lib/mock/data2";
+import { useBomTemplateCreateLogic } from "@/hooks/features/bom/useBomTemplateCreateLogic";
 
 export const Route = createFileRoute("/_app/bom/templates/create")({
   component: CreateBomTemplatePage,
 });
 
 function CreateBomTemplatePage() {
-  const navigate = useNavigate();
-  const createTemplate = useCreateBomTemplate();
-
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [columns, setColumns] = useState<string[]>(["Designator", "Quantity"]);
-
-  const addColumn = () => {
-    setColumns([...columns, ""]);
-  };
-
-  const removeColumn = (idx: number) => {
-    setColumns(columns.filter((_, i) => i !== idx));
-  };
-
-  const updateColumn = (idx: number, val: string) => {
-    const nc = [...columns];
-    nc[idx] = val;
-    setColumns(nc);
-  };
-
-  const handleSave = () => {
-    if (!name) {
-      toast.error("Template Name is required.");
-      return;
-    }
-    
-    if (columns.some(c => !c.trim())) {
-      toast.error("All column names must be filled or removed.");
-      return;
-    }
-
-    const payload: BomTemplate = {
-      id: "bt" + Date.now(),
-      name,
-      description,
-      columns: columns.map(c => c.trim()),
-    };
-
-    createTemplate.mutate(payload, {
-      onSuccess: () => {
-        toast.success("BOM Template created");
-        navigate({ to: "/bom" });
-      },
-      onError: () => toast.error("Failed to create template"),
-    });
-  };
+  const { state, handlers } = useBomTemplateCreateLogic();
+  const { name, description, columns, isPending } = state;
+  const { setName, setDescription, addColumn, removeColumn, updateColumn, handleSave } = handlers;
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
@@ -80,7 +35,7 @@ function CreateBomTemplatePage() {
                 <ArrowLeft className="mr-1.5 h-4 w-4" /> Cancel
               </Link>
             </Button>
-            <Button size="sm" onClick={handleSave} disabled={createTemplate.isPending}>
+            <Button size="sm" onClick={handleSave} disabled={isPending}>
               <Save className="mr-1.5 h-4 w-4" /> Save Template
             </Button>
           </div>

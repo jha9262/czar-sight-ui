@@ -11,7 +11,7 @@ import { DeleteDialog } from "@/components/delete-dialog";
 import { DataTableToolbar } from "@/components/ui/data-table-toolbar";
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
 import { itemTemplates as seed } from "@/lib/mock/data2";
-import { useItems, useDeleteItem } from "@/lib/queries";
+import { useItemsIndexLogic } from "@/hooks/features/inventory/useItemsIndexLogic";
 
 export const Route = createFileRoute("/_app/inventory/items/")({
   head: () => ({
@@ -24,14 +24,9 @@ export const Route = createFileRoute("/_app/inventory/items/")({
 });
 
 function ItemsPage() {
-  const { data: items = [] } = useItems();
-  const deleteItem = useDeleteItem();
-  const [q, setQ] = useState("");
-  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
-  
-  const filtered = items.filter((t) =>
-    `${t.name} ${t.companyPartCode}`.toLowerCase().includes(q.toLowerCase()),
-  );
+  const { state, handlers } = useItemsIndexLogic();
+  const { items, filtered, q, deleteTarget, isDeleting } = state;
+  const { setQ, setDeleteTarget, confirmDelete } = handlers;
 
   return (
     <div>
@@ -91,7 +86,7 @@ function ItemsPage() {
                   </TableCell>
                   <TableCell className="text-center">
                     <div className="flex flex-wrap justify-center gap-1">
-                      {Object.entries(t.attributes).map(([k, v]) => (
+                      {Object.entries(t.attributes || {}).map(([k, v]) => (
                         <span
                           key={k}
                           className="inline-flex items-center gap-1 rounded border bg-muted/40 px-1.5 py-0.5 font-mono text-[10px]"
@@ -137,7 +132,7 @@ function ItemsPage() {
           <DataTablePagination totalItems={items.length} itemsPerPage={filtered.length} itemName="templates" />
         </div>
       </div>
-      <DeleteDialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)} title="Delete item template?" description="This item template will be permanently removed." onConfirm={() => { if (deleteTarget) deleteItem.mutate(deleteTarget, { onSuccess: () => { toast.success("Item deleted"); setDeleteTarget(null); } }); }} isPending={deleteItem.isPending} />
+      <DeleteDialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)} title="Delete item template?" description="This item template will be permanently removed." onConfirm={confirmDelete} isPending={isDeleting} />
     </div>
   );
 }

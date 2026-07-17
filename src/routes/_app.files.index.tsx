@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { StatusBadge } from "@/components/status-badge";
 import { DeleteDialog } from "@/components/delete-dialog";
-import { useFiles, useDeleteFile } from "@/lib/queries";
+import { useFilesIndexLogic } from "@/hooks/features/administration/useFilesIndexLogic";
 
 export const Route = createFileRoute("/_app/files/")({
   head: () => ({ meta: [{ title: "Files — CZAR Production" }] }),
@@ -22,11 +22,9 @@ function fileIcon(type: string) {
 }
 
 function FilesPage() {
-  const { data: files = [] } = useFiles();
-  const deleteFile = useDeleteFile();
-  const [q, setQ] = useState("");
-  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
-  const filtered = files.filter((f) => f.filename.toLowerCase().includes(q.toLowerCase()));
+  const { state, handlers } = useFilesIndexLogic();
+  const { q, filtered, deleteTarget, isDeleting } = state;
+  const { setQ, setDeleteTarget, confirmDelete } = handlers;
 
   return (
     <div>
@@ -46,7 +44,14 @@ function FilesPage() {
               <TableCell><Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => setDeleteTarget(f.uuid)}><Trash2 className="h-4 w-4" /></Button></TableCell>
             </TableRow>))}</TableBody></Table></div>
       </div>
-      <DeleteDialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)} title="Delete file?" description="This file will be permanently removed." onConfirm={() => { if (deleteTarget) deleteFile.mutate(deleteTarget, { onSuccess: () => { toast.success("File deleted"); setDeleteTarget(null); } }); }} isPending={deleteFile.isPending} />
+      <DeleteDialog
+        open={!!deleteTarget}
+        onOpenChange={() => setDeleteTarget(null)}
+        title="Delete file?"
+        description="This file will be permanently removed."
+        onConfirm={confirmDelete}
+        isPending={isDeleting}
+      />
     </div>
   );
 }

@@ -3,8 +3,8 @@ import { ArrowLeft } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { StatusBadge } from "@/components/ui/status-badge";
-import { useManufacturer } from "@/lib/queries";
+import { StatusBadge } from "@/components/status-badge";
+import { useManufacturerViewLogic } from "@/hooks/features/sourcing/useManufacturerViewLogic";
 
 export const Route = createFileRoute("/_app/sourcing/manufacturers/$id")({
   head: () => ({ meta: [{ title: "View Manufacturer — CZAR Production" }] }),
@@ -13,7 +13,8 @@ export const Route = createFileRoute("/_app/sourcing/manufacturers/$id")({
 
 function ManufacturerViewPage() {
   const { id } = Route.useParams();
-  const { data: mfr, isLoading } = useManufacturer(id);
+  const { state } = useManufacturerViewLogic(id);
+  const { manufacturer: mfr, isLoading } = state;
 
   if (isLoading) return <div className="p-10 text-center">Loading...</div>;
   if (!mfr) return <div className="p-10 text-center">Manufacturer not found</div>;
@@ -29,7 +30,7 @@ function ManufacturerViewPage() {
         title={mfr.name}
         description="View manufacturer details."
       />
-      <div className="mx-auto max-w-3xl p-6">
+      <div className="mx-auto max-w-[100%] p-6">
         <Button variant="ghost" size="sm" asChild className="mb-6 -ml-3 text-muted-foreground">
           <Link to="/sourcing/manufacturers">
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -47,7 +48,7 @@ function ManufacturerViewPage() {
                 <div className="font-medium">{mfr.name}</div>
               </Field>
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4">
               <Field label="Contact Person">
                 <div>{mfr.contact}</div>
@@ -77,7 +78,7 @@ function ManufacturerViewPage() {
               </StatusBadge>
             </div>
           </div>
-          
+
           <div className="mt-8 flex justify-end gap-3 border-t pt-6">
             <Button variant="outline" asChild>
               <Link to={`/sourcing/manufacturers/edit/${mfr.code}`}>Edit Manufacturer</Link>

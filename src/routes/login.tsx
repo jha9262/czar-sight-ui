@@ -18,32 +18,12 @@ export const Route = createFileRoute("/login")({
   component: LoginPage,
 });
 
+import { useLoginLogic } from "@/hooks/features/auth/useLoginLogic";
+
 function LoginPage() {
-  const [step, setStep] = useState<"credentials" | "otp">("credentials");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [otp, setOtp] = useState("");
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const navigate = useNavigate();
-
-  function submitCreds(e: React.FormEvent) {
-    e.preventDefault();
-    const errs: Record<string, string> = {};
-    if (!email) errs.email = "Email required";
-    else if (!/^\S+@\S+\.\S+$/.test(email)) errs.email = "Invalid email";
-    if (!password) errs.password = "Password required";
-    setErrors(errs);
-    if (Object.keys(errs).length) return;
-    setStep("otp");
-  }
-
-  function submitOtp() {
-    if (otp.length !== 6) {
-      setErrors({ otp: "Enter the 6-digit code from your authenticator" });
-      return;
-    }
-    navigate({ to: "/dashboard" });
-  }
+  const { state, handlers } = useLoginLogic();
+  const { step, email, password, otp, errors } = state;
+  const { setEmail, setPassword, setOtp, setStep, submitCreds, submitOtp, navigateToMfaSetup } = handlers;
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12 sm:px-6 lg:px-8">
@@ -115,7 +95,7 @@ function LoginPage() {
               <p className="mt-6 text-center text-xs text-muted-foreground">
                 Need MFA?{" "}
                 <button
-                  onClick={() => navigate({ to: "/mfa-setup" })}
+                  onClick={navigateToMfaSetup}
                   className="text-primary hover:underline"
                 >
                   Set up authenticator

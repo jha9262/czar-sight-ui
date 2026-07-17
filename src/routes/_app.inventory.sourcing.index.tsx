@@ -18,8 +18,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { DeleteDialog } from "@/components/delete-dialog";
 import { DataTableToolbar } from "@/components/ui/data-table-toolbar";
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
-import { sourcings as seed } from "@/lib/mock/data2";
-import { useSourcings, useDeleteSourcing } from "@/lib/queries";
+import { useSourcingIndexLogic } from "@/hooks/features/inventory/useSourcingIndexLogic";
 
 export const Route = createFileRoute("/_app/inventory/sourcing/")({
   head: () => ({
@@ -32,14 +31,9 @@ export const Route = createFileRoute("/_app/inventory/sourcing/")({
 });
 
 function SourcingPage() {
-  const { data: sourcings = [] } = useSourcings();
-  const deleteSourcing = useDeleteSourcing();
-  const [q, setQ] = useState("");
-  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
-
-  const filtered = sourcings.filter((s) => 
-    `${s.templateName} ${s.templateCode} ${s.manufacturer} ${s.mpn}`.toLowerCase().includes(q.toLowerCase())
-  );
+  const { state, handlers } = useSourcingIndexLogic();
+  const { sourcings, filtered, q, deleteTarget, isDeleting } = state;
+  const { setQ, setDeleteTarget, confirmDelete } = handlers;
 
   return (
     <div>
@@ -127,7 +121,7 @@ function SourcingPage() {
           <DataTablePagination totalItems={sourcings.length} itemsPerPage={filtered.length} itemName="sources" />
         </div>
       </div>
-      <DeleteDialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)} title="Delete sourcing link?" description="This link will be removed." onConfirm={() => { if (deleteTarget) deleteSourcing.mutate(deleteTarget, { onSuccess: () => { toast.success("Sourcing link deleted"); setDeleteTarget(null); } }); }} isPending={deleteSourcing.isPending} />
+      <DeleteDialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)} title="Delete sourcing link?" description="This manufacturer-MPN link will be removed." onConfirm={confirmDelete} isPending={isDeleting} />
     </div>
   );
 }

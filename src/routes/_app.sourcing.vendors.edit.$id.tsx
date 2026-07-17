@@ -6,8 +6,7 @@ import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { type Vendor } from "@/lib/mock/data3";
-import { useVendor, useUpdateVendor } from "@/lib/queries";
+import { useVendorEditLogic } from "@/hooks/features/sourcing/useVendorEditLogic";
 
 export const Route = createFileRoute("/_app/sourcing/vendors/edit/$id")({
   head: () => ({ meta: [{ title: "Edit Vendor — CZAR Production" }] }),
@@ -16,31 +15,16 @@ export const Route = createFileRoute("/_app/sourcing/vendors/edit/$id")({
 
 function VendorEditPage() {
   const { id } = Route.useParams();
-  const navigate = useNavigate();
-  const { data: vendor, isLoading } = useVendor(id);
-  const updateVendor = useUpdateVendor();
-  const [form, setForm] = useState<Vendor | null>(null);
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const { state, handlers } = useVendorEditLogic(id);
+  const { form, errors, isLoading, isPending } = state;
+  const { set, submit } = handlers;
 
-  useEffect(() => { if (vendor) setForm({ ...vendor }); }, [vendor]);
   if (isLoading || !form) return <div className="flex items-center justify-center p-12 text-muted-foreground">Loading…</div>;
-
-  function set<K extends keyof Vendor>(k: K, v: Vendor[K]) { setForm((f) => f ? { ...f, [k]: v } : f); }
-
-  function submit() {
-    if (!form) return;
-    const e: Record<string, string> = {};
-    if (!form.name.trim()) e.name = "Required";
-    if (!form.email.trim()) e.email = "Required";
-    setErrors(e);
-    if (Object.keys(e).length) return;
-    updateVendor.mutate(form, { onSuccess: () => { toast.success("Vendor updated"); navigate({ to: "/sourcing/vendors" }); } });
-  }
 
   return (
     <div>
       <PageHeader breadcrumbs={[{ label: "Home", to: "/dashboard" }, { label: "Vendors", to: "/sourcing/vendors" }, { label: `Edit ${form.code}` }]} title={`Edit ${form.name}`} description="Update vendor details." />
-      <div className="mx-auto max-w-3xl p-6">
+      <div className="mx-auto max-w-[100%] p-6">
         <Button variant="ghost" size="sm" asChild className="mb-6 -ml-3 text-muted-foreground"><Link to="/sourcing/vendors"><ArrowLeft className="mr-2 h-4 w-4" />Back to vendors</Link></Button>
         <div className="rounded-xl border bg-card p-6 shadow-sm">
           <div className="space-y-6">
@@ -64,7 +48,7 @@ function VendorEditPage() {
           </div>
           <div className="mt-8 flex justify-end gap-3 border-t pt-6">
             <Button variant="outline" asChild><Link to="/sourcing/vendors">Cancel</Link></Button>
-            <Button onClick={submit}>Save changes</Button>
+            <Button onClick={submit} disabled={isPending}>{isPending ? "Saving..." : "Save changes"}</Button>
           </div>
         </div>
       </div>

@@ -7,9 +7,7 @@ import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useBulkItem, useUpdateBulkItem } from "@/lib/queries";
-import { itemTemplates } from "@/lib/mock/data2";
-import { warehouses } from "@/lib/mock/data";
+import { useStockEditBulkLogic } from "@/hooks/features/inventory/useStockEditBulkLogic";
 
 export const Route = createFileRoute("/_app/inventory/stock/edit-bulk/$id")({
   head: () => ({
@@ -20,54 +18,12 @@ export const Route = createFileRoute("/_app/inventory/stock/edit-bulk/$id")({
 
 function EditBulkPage() {
   const { id } = Route.useParams();
-  const navigate = useNavigate();
-  const { data: item, isLoading } = useBulkItem(id);
-  const updateItem = useUpdateBulkItem();
-
-  const [template, setTemplate] = useState("");
-  const [warehouse, setWarehouse] = useState("");
-  const [batch, setBatch] = useState("");
-  const [qty, setQty] = useState("");
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
-  useEffect(() => {
-    if (item) {
-      setTemplate(item.template);
-      setWarehouse(item.warehouse);
-      setBatch(item.batchNumber);
-      setQty(item.quantity.toString());
-    }
-  }, [item]);
+  const { state, handlers } = useStockEditBulkLogic(id);
+  const { item, isLoading, template, warehouse, batch, qty, errors, itemTemplates, warehouses, isPending } = state;
+  const { setTemplate, setWarehouse, setBatch, setQty, submit } = handlers;
 
   if (isLoading) return <div className="p-10 text-center">Loading...</div>;
   if (!item) return <div className="p-10 text-center">Item not found</div>;
-
-  function submit() {
-    const e: Record<string, string> = {};
-    if (!template) e.template = "Template is required";
-    if (!warehouse) e.warehouse = "Warehouse is required";
-    if (!batch.trim()) e.batch = "Batch number is required";
-    if (!qty || Number(qty) < 0) e.qty = "Enter a valid quantity";
-    setErrors(e);
-    if (Object.keys(e).length) return;
-
-    updateItem.mutate(
-      {
-        ...item!,
-        batchNumber: batch,
-        template,
-        warehouse,
-        quantity: Number(qty),
-        companyPartCode: itemTemplates.find((t) => t.name === template)?.companyPartCode || item!.companyPartCode,
-      },
-      {
-        onSuccess: () => {
-          toast.success("Bulk stock updated");
-          navigate({ to: "/inventory/stock" });
-        },
-      }
-    );
-  }
 
   return (
     <div>
@@ -82,7 +38,7 @@ function EditBulkPage() {
         description="Update details for a specific bulk batch."
       />
 
-      <div className="mx-auto max-w-3xl p-6">
+      <div className="mx-auto max-w-[100%] p-6">
         <Button variant="ghost" size="sm" asChild className="mb-6 -ml-3 text-muted-foreground">
           <Link to="/inventory/stock">
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -112,7 +68,7 @@ function EditBulkPage() {
               >
                 <option value="" disabled>Select warehouse</option>
                 {warehouses.map((w) => (
-                  <option key={w.id} value={w.code}>{w.code} - {w.title}</option>
+                  <option key={w.id} value={w.code}>{w.code} - {w.name}</option>
                 ))}
               </select>
             </Field>
@@ -141,8 +97,8 @@ function EditBulkPage() {
             <Button variant="outline" asChild>
               <Link to="/inventory/stock">Cancel</Link>
             </Button>
-            <Button onClick={submit} disabled={updateItem.isPending}>
-              {updateItem.isPending ? "Saving..." : "Save changes"}
+            <Button onClick={submit} disabled={isPending}>
+              {isPending ? "Saving..." : "Save changes"}
             </Button>
           </div>
         </div>

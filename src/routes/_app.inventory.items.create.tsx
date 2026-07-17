@@ -8,8 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { type ItemTemplate } from "@/lib/mock/data2";
-import { useCreateItem } from "@/lib/queries";
+import { useItemCreateLogic } from "@/hooks/features/inventory/useItemCreateLogic";
 
 export const Route = createFileRoute("/_app/inventory/items/create")({
   head: () => ({
@@ -19,37 +18,9 @@ export const Route = createFileRoute("/_app/inventory/items/create")({
 });
 
 function ItemCreatePage() {
-  const navigate = useNavigate();
-  const createItem = useCreateItem();
-
-  const [form, setForm] = useState<ItemTemplate>({
-    id: crypto.randomUUID(),
-    name: "",
-    companyPartCode: "",
-    isSerialized: false,
-    attributes: {},
-    isActive: true,
-  });
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
-  function set<K extends keyof ItemTemplate>(k: K, v: ItemTemplate[K]) {
-    setForm((f) => ({ ...f, [k]: v }));
-  }
-
-  function submit() {
-    const e: Record<string, string> = {};
-    if (!form.name.trim()) e.name = "Name is required";
-    if (!form.companyPartCode.trim()) e.companyPartCode = "Company Part Code is required";
-    setErrors(e);
-    if (Object.keys(e).length) return;
-
-    createItem.mutate(form, {
-      onSuccess: () => {
-        toast.success("Item template created");
-        navigate({ to: "/inventory/items" });
-      },
-    });
-  }
+  const { state, handlers } = useItemCreateLogic();
+  const { form, errors } = state;
+  const { set, submit } = handlers;
 
   return (
     <div>
@@ -64,7 +35,7 @@ function ItemCreatePage() {
         description="Create a catalog item template."
       />
 
-      <div className="mx-auto max-w-3xl p-6">
+      <div className="mx-auto max-w-[100%] p-6">
         <Button variant="ghost" size="sm" asChild className="mb-6 -ml-3 text-muted-foreground">
           <Link to="/inventory/items">
             <ArrowLeft className="mr-2 h-4 w-4" />

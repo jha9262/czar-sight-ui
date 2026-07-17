@@ -9,8 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { partTypes, type PartMaster } from "@/lib/mock/data2";
-import { useCreatePart } from "@/lib/queries";
+import { usePartCreateLogic } from "@/hooks/features/inventory/usePartCreateLogic";
 
 export const Route = createFileRoute("/_app/inventory/parts/create")({
   head: () => ({
@@ -20,37 +19,9 @@ export const Route = createFileRoute("/_app/inventory/parts/create")({
 });
 
 function PartCreatePage() {
-  const navigate = useNavigate();
-  const createPart = useCreatePart();
-
-  const [form, setForm] = useState<PartMaster>({
-    id: crypto.randomUUID(),
-    partNumber: "",
-    partType: partTypes[0]?.name || "",
-    name: "",
-    description: "",
-  });
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
-  function set<K extends keyof PartMaster>(k: K, v: PartMaster[K]) {
-    setForm((f) => ({ ...f, [k]: v }));
-  }
-
-  function submit() {
-    const e: Record<string, string> = {};
-    if (!form.partNumber.trim()) e.partNumber = "Part Number is required";
-    if (!form.name.trim()) e.name = "Name is required";
-    if (!form.partType.trim()) e.partType = "Part Type is required";
-    setErrors(e);
-    if (Object.keys(e).length) return;
-
-    createPart.mutate(form, {
-      onSuccess: () => {
-        toast.success("Part created successfully");
-        navigate({ to: "/inventory/parts" });
-      },
-    });
-  }
+  const { state, handlers } = usePartCreateLogic();
+  const { form, errors, partTypes } = state;
+  const { set, submit } = handlers;
 
   return (
     <div>
@@ -65,7 +36,7 @@ function PartCreatePage() {
         description="Add a new component or part to your catalog."
       />
 
-      <div className="mx-auto max-w-3xl p-6">
+      <div className="mx-auto max-w-[100%] p-6">
         <Button variant="ghost" size="sm" asChild className="mb-6 -ml-3 text-muted-foreground">
           <Link to="/inventory/parts">
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -88,7 +59,7 @@ function PartCreatePage() {
                 <Input value={form.name} onChange={(e) => set("name", e.target.value)} placeholder="Part Name" />
               </Field>
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4">
               <Field label="Part Type" error={errors.partType}>
                 <Select value={form.partType} onValueChange={(v) => set("partType", v)}>

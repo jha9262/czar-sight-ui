@@ -1,4 +1,4 @@
-  import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
@@ -9,9 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { warehouses as seed, type Warehouse } from "@/lib/mock/data";
-
-import { useCreateWarehouse } from "@/lib/queries";
+import { useWarehouseCreateLogic } from "@/hooks/features/administration/useWarehouseCreateLogic";
 
 export const Route = createFileRoute("/_app/warehouses/create")({
   head: () => ({
@@ -21,45 +19,9 @@ export const Route = createFileRoute("/_app/warehouses/create")({
 });
 
 function WarehouseCreatePage() {
-  const navigate = useNavigate();
-  const createWarehouse = useCreateWarehouse();
-
-  const [form, setForm] = useState<Warehouse>({
-    id: crypto.randomUUID(),
-    code: "",
-    name: "",
-    phone: "",
-    email: "",
-    address: "",
-    city: "",
-    state: "",
-    country: "India",
-    postalCode: "",
-    isActive: true,
-  });
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
-  function set<K extends keyof Warehouse>(k: K, v: Warehouse[K]) {
-    setForm((f) => ({ ...f, [k]: v }));
-  }
-
-  function submit() {
-    const e: Record<string, string> = {};
-    if (!form.code.trim()) e.code = "Code is required";
-    if (!form.name.trim()) e.name = "Name is required";
-    if (!form.email.trim()) e.email = "Email is required";
-    else if (!/^\S+@\S+\.\S+$/.test(form.email)) e.email = "Invalid email";
-    if (!form.city.trim()) e.city = "City is required";
-    setErrors(e);
-    if (Object.keys(e).length) return;
-
-    createWarehouse.mutate(form, {
-      onSuccess: () => {
-        toast.success("Warehouse created");
-        navigate({ to: "/warehouses" });
-      },
-    });
-  }
+  const { state, handlers } = useWarehouseCreateLogic();
+  const { form, errors, isPending } = state;
+  const { set, submit } = handlers;
 
   return (
     <div>
@@ -73,7 +35,7 @@ function WarehouseCreatePage() {
         description="Location codes are used across stock entries, transfers and ledgers."
       />
 
-      <div className="mx-auto max-w-3xl p-6">
+      <div className="mx-auto max-w-[100%] p-6">
         <Button variant="ghost" size="sm" asChild className="mb-6 -ml-3 text-muted-foreground">
           <Link to="/warehouses">
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -137,7 +99,9 @@ function WarehouseCreatePage() {
             <Button variant="outline" asChild>
               <Link to="/warehouses">Cancel</Link>
             </Button>
-            <Button onClick={submit}>Create warehouse</Button>
+            <Button onClick={submit} disabled={isPending}>
+              {isPending ? "Creating..." : "Create warehouse"}
+            </Button>
           </div>
         </div>
       </div>
