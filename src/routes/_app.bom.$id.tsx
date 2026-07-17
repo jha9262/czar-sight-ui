@@ -23,7 +23,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { bomTree, boms, partMasters, type BomNode } from "@/lib/mock/data2";
+import { partMasters, type BomNode } from "@/lib/mock/data2";
+import { useBomViewLogic, useAddBomItemLogic } from "@/hooks/features/bom/useBomViewLogic";
 
 export const Route = createFileRoute("/_app/bom/$id")({
   head: () => ({
@@ -37,8 +38,9 @@ export const Route = createFileRoute("/_app/bom/$id")({
 
 function BomDetailPage() {
   const { id } = Route.useParams();
-  const bom = boms.find((b) => b.id === id) ?? boms[0];
-  const [open, setOpen] = useState(false);
+  const { state, handlers } = useBomViewLogic(id);
+  const { bom, bomTree, isAddDialogOpen } = state;
+  const { setAddDialogOpen } = handlers;
 
   return (
     <div>
@@ -57,7 +59,7 @@ function BomDetailPage() {
             ) : (
               <StatusBadge tone="warning">Draft</StatusBadge>
             )}
-            <Button size="sm" onClick={() => setOpen(true)}>
+            <Button size="sm" onClick={() => setAddDialogOpen(true)}>
               <Plus className="mr-1.5 h-4 w-4" /> Add BOM item
             </Button>
           </>
@@ -66,10 +68,9 @@ function BomDetailPage() {
 
       <div className="p-6">
         <div className="rounded-lg border bg-card">
-          <div className="grid grid-cols-[1fr_120px_120px_1fr] gap-4 border-b bg-muted/30 px-5 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+          <div className="grid grid-cols-[1fr_120px_1fr] gap-4 border-b bg-muted/30 px-5 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
             <div>Part</div>
             <div className="text-right">Quantity</div>
-            <div>Unit</div>
             <div>Description</div>
           </div>
           <div className="p-2">
@@ -80,7 +81,7 @@ function BomDetailPage() {
         </div>
       </div>
 
-      <AddBomItemDialog open={open} onOpenChange={setOpen} />
+      <AddBomItemDialog open={isAddDialogOpen} onOpenChange={setAddDialogOpen} />
     </div>
   );
 }
@@ -91,7 +92,7 @@ function TreeRow({ node, depth }: { node: BomNode; depth: number }) {
   return (
     <div>
       <div
-        className="grid cursor-pointer grid-cols-[1fr_120px_120px_1fr] items-center gap-4 rounded px-3 py-2 text-sm hover:bg-accent/40"
+        className="grid cursor-pointer grid-cols-[1fr_120px_1fr] items-center gap-4 rounded px-3 py-2 text-sm hover:bg-accent/40"
         onClick={() => hasKids && setOpen((v) => !v)}
       >
         <div className="flex items-center gap-1.5" style={{ paddingLeft: depth * 20 }}>
@@ -110,7 +111,6 @@ function TreeRow({ node, depth }: { node: BomNode; depth: number }) {
           </div>
         </div>
         <div className="text-right font-mono tabular-nums">{node.quantity}</div>
-        <div className="font-mono text-xs text-muted-foreground">{node.unit}</div>
         <div className="truncate text-xs text-muted-foreground">{node.description}</div>
       </div>
       {hasKids && open && (
@@ -125,15 +125,9 @@ function TreeRow({ node, depth }: { node: BomNode; depth: number }) {
 }
 
 function AddBomItemDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
-  const [part, setPart] = useState("");
-  const [qty, setQty] = useState("");
-  function submit() {
-    if (!part || !qty) return toast.error("Select a part and quantity");
-    toast.success("BOM item added");
-    onOpenChange(false);
-    setPart("");
-    setQty("");
-  }
+  const { state, handlers } = useAddBomItemLogic(onOpenChange);
+  const { part, qty } = state;
+  const { setPart, setQty, submit } = handlers;
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>

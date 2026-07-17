@@ -20,7 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ledger } from "@/lib/mock/data2";
+import { useStockLedgerLogic } from "@/hooks/features/stock/useStockLedgerLogic";
 import { warehouses } from "@/lib/mock/data";
 
 export const Route = createFileRoute("/_app/stock/ledger")({
@@ -34,8 +34,9 @@ export const Route = createFileRoute("/_app/stock/ledger")({
 });
 
 function LedgerPage() {
-  const [wh, setWh] = useState("all");
-  const rows = ledger.filter((r) => wh === "all" || r.warehouse === wh);
+  const { state, handlers } = useStockLedgerLogic();
+  const { wh, rows } = state;
+  const { setWh } = handlers;
 
   return (
     <div>
@@ -104,7 +105,7 @@ function LedgerPage() {
                       −{r.outQty.toLocaleString()}
                     </TableCell>
                     <TableCell className="text-right font-mono tabular-nums font-semibold">
-                      {r.closingQty.toLocaleString()} <span className="text-xs font-normal text-muted-foreground">{r.unit}</span>
+                      {r.closingQty.toLocaleString()}
                     </TableCell>
                     <TableCell className="text-right font-mono text-xs text-muted-foreground">
                       {r.reorderLevel.toLocaleString()}

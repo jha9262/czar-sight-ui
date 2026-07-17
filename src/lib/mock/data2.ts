@@ -13,17 +13,17 @@ export type PartMaster = {
   partType: string;
   name: string;
   description: string;
-  unit: string;
+  
 };
 export const partMasters: PartMaster[] = [
-  { id: "pm1", partNumber: "CZR-CTL-R4-001", partType: "Electronics", name: "Controller Board r4", description: "Main IoT controller w/ LTE-M", unit: "pcs" },
-  { id: "pm2", partNumber: "CZR-PMP-STD-002", partType: "Fluidics", name: "Peristaltic Pump 12V", description: "Standard 100 mL/min pump", unit: "pcs" },
-  { id: "pm3", partNumber: "CZR-GSK-22-003", partType: "Fluidics", name: "Silicone Gasket 22mm", description: "Food-grade EPDM sealing gasket", unit: "pcs" },
-  { id: "pm4", partNumber: "CZR-HSG-DSP-004", partType: "Mechanical", name: "Dispenser Housing", description: "ABS injection-moulded shell", unit: "pcs" },
-  { id: "pm5", partNumber: "CZR-SCR-M4-005", partType: "Mechanical", name: "M4x12 SS Screw", description: "Stainless machine screw", unit: "pcs" },
-  { id: "pm6", partNumber: "CZR-WIR-18-006", partType: "Electronics", name: "18AWG Silicone Wire", description: "Red/black flexible wire", unit: "m" },
-  { id: "pm7", partNumber: "CZR-NZL-STD-007", partType: "Fluidics", name: "Nozzle Assembly", description: "Anti-drip dispenser nozzle", unit: "pcs" },
-  { id: "pm8", partNumber: "CZR-BOX-DSP-008", partType: "Packaging", name: "Retail Box — DSP v3", description: "Printed corrugated box", unit: "pcs" },
+  { id: "pm1", partNumber: "CZR-CTL-R4-001", partType: "Electronics", name: "Controller Board r4", description: "Main IoT controller w/ LTE-M" },
+  { id: "pm2", partNumber: "CZR-PMP-STD-002", partType: "Fluidics", name: "Peristaltic Pump 12V", description: "Standard 100 mL/min pump" },
+  { id: "pm3", partNumber: "CZR-GSK-22-003", partType: "Fluidics", name: "Silicone Gasket 22mm", description: "Food-grade EPDM sealing gasket" },
+  { id: "pm4", partNumber: "CZR-HSG-DSP-004", partType: "Mechanical", name: "Dispenser Housing", description: "ABS injection-moulded shell" },
+  { id: "pm5", partNumber: "CZR-SCR-M4-005", partType: "Mechanical", name: "M4x12 SS Screw", description: "Stainless machine screw" },
+  { id: "pm6", partNumber: "CZR-WIR-18-006", partType: "Electronics", name: "18AWG Silicone Wire", description: "Red/black flexible wire" },
+  { id: "pm7", partNumber: "CZR-NZL-STD-007", partType: "Fluidics", name: "Nozzle Assembly", description: "Anti-drip dispenser nozzle" },
+  { id: "pm8", partNumber: "CZR-BOX-DSP-008", partType: "Packaging", name: "Retail Box — DSP v3", description: "Printed corrugated box" },
 ];
 
 export type ItemTemplate = {
@@ -31,18 +31,18 @@ export type ItemTemplate = {
   name: string;
   companyPartCode: string;
   isSerialized: boolean;
-  unit: string;
+  
   attributes: Record<string, string>;
   isActive: boolean;
 };
 export const itemTemplates: ItemTemplate[] = [
-  { id: "it1", name: "Dispenser Unit v3", companyPartCode: "CZR-DSP-V3", isSerialized: true, unit: "pcs", attributes: { color: "White", firmware: "v3.2.1", region: "IN" }, isActive: true },
-  { id: "it2", name: "Controller Board r4", companyPartCode: "CZR-CTL-R4", isSerialized: true, unit: "pcs", attributes: { revision: "r4", modem: "LTE-M" }, isActive: true },
-  { id: "it3", name: "Peristaltic Pump", companyPartCode: "CZR-PMP-STD", isSerialized: true, unit: "pcs", attributes: { flow: "100mL/min", voltage: "12V" }, isActive: true },
-  { id: "it4", name: "Silicone Gasket 22mm", companyPartCode: "CZR-GSK-22", isSerialized: false, unit: "pcs", attributes: { material: "EPDM", grade: "FDA" }, isActive: true },
-  { id: "it5", name: "M4x12 SS Screw", companyPartCode: "CZR-SCR-M4-12", isSerialized: false, unit: "pcs", attributes: { drive: "Torx T20", finish: "SS304" }, isActive: true },
-  { id: "it6", name: "18AWG Wire", companyPartCode: "CZR-WIR-18", isSerialized: false, unit: "m", attributes: { colors: "Red/Black" }, isActive: true },
-  { id: "it7", name: "Legacy Nozzle v1", companyPartCode: "CZR-NZL-V1", isSerialized: false, unit: "pcs", attributes: { deprecated: "true" }, isActive: false },
+  { id: "it1", name: "Dispenser Unit v3", companyPartCode: "CZR-DSP-V3", isSerialized: true, attributes: { color: "White", firmware: "v3.2.1", region: "IN" }, isActive: true },
+  { id: "it2", name: "Controller Board r4", companyPartCode: "CZR-CTL-R4", isSerialized: true, attributes: { revision: "r4", modem: "LTE-M" }, isActive: true },
+  { id: "it3", name: "Peristaltic Pump", companyPartCode: "CZR-PMP-STD", isSerialized: true, attributes: { flow: "100mL/min", voltage: "12V" }, isActive: true },
+  { id: "it4", name: "Silicone Gasket 22mm", companyPartCode: "CZR-GSK-22", isSerialized: false, attributes: { material: "EPDM", grade: "FDA" }, isActive: true },
+  { id: "it5", name: "M4x12 SS Screw", companyPartCode: "CZR-SCR-M4-12", isSerialized: false, attributes: { drive: "Torx T20", finish: "SS304" }, isActive: true },
+  { id: "it6", name: "18AWG Wire", companyPartCode: "CZR-WIR-18", isSerialized: false, attributes: { colors: "Red/Black" }, isActive: true },
+  { id: "it7", name: "Legacy Nozzle v1", companyPartCode: "CZR-NZL-V1", isSerialized: false, attributes: { deprecated: "true" }, isActive: false },
 ];
 
 export type Sourcing = {
@@ -105,7 +105,7 @@ export type BomNode = {
   partNumber: string;
   name: string;
   quantity: number;
-  unit: string;
+  
   description?: string;
   children?: BomNode[];
 };
@@ -115,7 +115,6 @@ export const bomTree: BomNode[] = [
     partNumber: "CZR-ASM-DSP-V3",
     name: "Dispenser Unit v3 (Assembly)",
     quantity: 1,
-    unit: "pcs",
     description: "Top-level dispenser assembly",
     children: [
       {
@@ -123,11 +122,10 @@ export const bomTree: BomNode[] = [
         partNumber: "CZR-ASM-HOUSING",
         name: "Housing Assembly",
         quantity: 1,
-        unit: "pcs",
         children: [
-          { id: "n1a1", partNumber: "CZR-HSG-DSP-004", name: "Dispenser Housing", quantity: 1, unit: "pcs" },
-          { id: "n1a2", partNumber: "CZR-GSK-22-003", name: "Silicone Gasket 22mm", quantity: 4, unit: "pcs" },
-          { id: "n1a3", partNumber: "CZR-SCR-M4-005", name: "M4x12 SS Screw", quantity: 12, unit: "pcs" },
+          { id: "n1a1", partNumber: "CZR-HSG-DSP-004", name: "Dispenser Housing", quantity: 1 },
+          { id: "n1a2", partNumber: "CZR-GSK-22-003", name: "Silicone Gasket 22mm", quantity: 4 },
+          { id: "n1a3", partNumber: "CZR-SCR-M4-005", name: "M4x12 SS Screw", quantity: 12 },
         ],
       },
       {
@@ -135,10 +133,9 @@ export const bomTree: BomNode[] = [
         partNumber: "CZR-ASM-ELECTRONICS",
         name: "Electronics Assembly",
         quantity: 1,
-        unit: "pcs",
         children: [
-          { id: "n1b1", partNumber: "CZR-CTL-R4-001", name: "Controller Board r4", quantity: 1, unit: "pcs" },
-          { id: "n1b2", partNumber: "CZR-WIR-18-006", name: "18AWG Silicone Wire", quantity: 2.4, unit: "m" },
+          { id: "n1b1", partNumber: "CZR-CTL-R4-001", name: "Controller Board r4", quantity: 1 },
+          { id: "n1b2", partNumber: "CZR-WIR-18-006", name: "18AWG Silicone Wire", quantity: 2.4 },
         ],
       },
       {
@@ -146,10 +143,9 @@ export const bomTree: BomNode[] = [
         partNumber: "CZR-ASM-FLUIDICS",
         name: "Fluidics Assembly",
         quantity: 1,
-        unit: "pcs",
         children: [
-          { id: "n1c1", partNumber: "CZR-PMP-STD-002", name: "Peristaltic Pump 12V", quantity: 2, unit: "pcs" },
-          { id: "n1c2", partNumber: "CZR-NZL-STD-007", name: "Nozzle Assembly", quantity: 1, unit: "pcs" },
+          { id: "n1c1", partNumber: "CZR-PMP-STD-002", name: "Peristaltic Pump 12V", quantity: 2 },
+          { id: "n1c2", partNumber: "CZR-NZL-STD-007", name: "Nozzle Assembly", quantity: 1 },
         ],
       },
     ],
@@ -183,17 +179,17 @@ export type LedgerRow = {
   inQty: number;
   outQty: number;
   closingQty: number;
-  unit: string;
+  
   reorderLevel: number;
 };
 export const ledger: LedgerRow[] = [
-  { id: "l1", warehouse: "WH-BLR-01", partCode: "CZR-DSP-V3", partName: "Dispenser Unit v3", openingQty: 180, inQty: 24, outQty: 20, closingQty: 184, unit: "pcs", reorderLevel: 100 },
-  { id: "l2", warehouse: "WH-BLR-01", partCode: "CZR-GSK-22", partName: "Silicone Gasket 22mm", openingQty: 4000, inQty: 500, outQty: 300, closingQty: 4200, unit: "pcs", reorderLevel: 1500 },
-  { id: "l3", warehouse: "WH-PUN-06", partCode: "CZR-CTL-R4", partName: "Controller Board r4", openingQty: 100, inQty: 50, outQty: 42, closingQty: 108, unit: "pcs", reorderLevel: 60 },
-  { id: "l4", warehouse: "WH-MUM-02", partCode: "CZR-PMP-STD", partName: "Peristaltic Pump", openingQty: 55, inQty: 12, outQty: 8, closingQty: 59, unit: "pcs", reorderLevel: 80 },
-  { id: "l5", warehouse: "WH-DEL-03", partCode: "CZR-NZL-STD", partName: "Nozzle Assembly", openingQty: 400, inQty: 0, outQty: 60, closingQty: 340, unit: "pcs", reorderLevel: 200 },
-  { id: "l6", warehouse: "WH-HYD-05", partCode: "CZR-WIR-18", partName: "18AWG Wire", openingQty: 500, inQty: 200, outQty: 80, closingQty: 620, unit: "m", reorderLevel: 250 },
-  { id: "l7", warehouse: "WH-CHN-04", partCode: "CZR-FIL-PLA", partName: "PLA Filament 1.75", openingQty: 150, inQty: 0, outQty: 30, closingQty: 120, unit: "kg", reorderLevel: 100 },
+  { id: "l1", warehouse: "WH-BLR-01", partCode: "CZR-DSP-V3", partName: "Dispenser Unit v3", openingQty: 180, inQty: 24, outQty: 20, closingQty: 184, reorderLevel: 100 },
+  { id: "l2", warehouse: "WH-BLR-01", partCode: "CZR-GSK-22", partName: "Silicone Gasket 22mm", openingQty: 4000, inQty: 500, outQty: 300, closingQty: 4200, reorderLevel: 1500 },
+  { id: "l3", warehouse: "WH-PUN-06", partCode: "CZR-CTL-R4", partName: "Controller Board r4", openingQty: 100, inQty: 50, outQty: 42, closingQty: 108, reorderLevel: 60 },
+  { id: "l4", warehouse: "WH-MUM-02", partCode: "CZR-PMP-STD", partName: "Peristaltic Pump", openingQty: 55, inQty: 12, outQty: 8, closingQty: 59, reorderLevel: 80 },
+  { id: "l5", warehouse: "WH-DEL-03", partCode: "CZR-NZL-STD", partName: "Nozzle Assembly", openingQty: 400, inQty: 0, outQty: 60, closingQty: 340, reorderLevel: 200 },
+  { id: "l6", warehouse: "WH-HYD-05", partCode: "CZR-WIR-18", partName: "18AWG Wire", openingQty: 500, inQty: 200, outQty: 80, closingQty: 620, reorderLevel: 250 },
+  { id: "l7", warehouse: "WH-CHN-04", partCode: "CZR-FIL-PLA", partName: "PLA Filament 1.75", openingQty: 150, inQty: 0, outQty: 30, closingQty: 120, reorderLevel: 100 },
 ];
 
 export type UserRow = {
@@ -212,4 +208,61 @@ export const users: UserRow[] = [
   { id: "u4", name: "Neha Kapoor", email: "neha@czar.io", role: "Manager", isActive: true, mfaEnabled: true, lastActive: "yesterday" },
   { id: "u5", name: "Karan Malhotra", email: "karan@czar.io", role: "Operator", isActive: true, mfaEnabled: false, lastActive: "3 d ago" },
   { id: "u6", name: "Vikram Iyer", email: "vikram@czar.io", role: "Operator", isActive: false, mfaEnabled: false, lastActive: "2 mo ago" },
+];
+
+export type Blueprint = {
+  id: string;
+  name: string;
+  productModelId: string;
+  activeRevision: string;
+  status: string;
+};
+export const blueprints: Blueprint[] = [
+  { id: "bp1", name: "DSP-V3-STD Base Assembly", productModelId: "dm1", activeRevision: "v1.4", status: "Active" },
+  { id: "bp2", name: "DSP-V3-PRO Comm Assembly", productModelId: "dm2", activeRevision: "v2.0", status: "Draft" },
+];
+
+export type PartVersion = {
+  id: string;
+  partMasterId: string;
+  versionLabel: string;
+  changelog: string;
+};
+export const partVersions: PartVersion[] = [
+  { id: "pv1", partMasterId: "pm1", versionLabel: "r4.0", changelog: "Initial r4 release" },
+  { id: "pv2", partMasterId: "pm1", versionLabel: "r4.1", changelog: "Fixed voltage regulator issue" },
+];
+
+export type PartVariant = {
+  id: string;
+  partVersionId: string;
+  variantName: string;
+  specifications: string;
+};
+export const partVariants: PartVariant[] = [
+  { id: "pva1", partVersionId: "pv1", variantName: "US Band", specifications: "LTE-M Band 2, 4, 12" },
+  { id: "pva2", partVersionId: "pv1", variantName: "EU Band", specifications: "LTE-M Band 3, 8, 20" },
+];
+
+export type BomComponentType = {
+  id: string;
+  code: string;
+  name: string;
+  description: string;
+  properties: { key: string; dataType: string; requirement: string }[];
+};
+export const bomComponentTypes: BomComponentType[] = [
+  { id: "bct1", code: "PCB-ASM", name: "PCB Assembly", description: "Printed circuit board assemblies", properties: [{ key: "Footprint", dataType: "String", requirement: "Optional" }, { key: "Designator", dataType: "String", requirement: "Mandatory" }] },
+  { id: "bct2", code: "MECH-FAS", name: "Mechanical Fastener", description: "Screws, nuts, washers", properties: [{ key: "Torque", dataType: "Number", requirement: "Optional" }] },
+];
+
+export type BomTemplate = {
+  id: string;
+  name: string;
+  description: string;
+  columns: string[];
+};
+export const bomTemplates: BomTemplate[] = [
+  { id: "bt1", name: "Standard Electronics BOM", description: "Used for all PCB assemblies", columns: ["Designator", "Footprint", "Quantity", "Manufacturer"] },
+  { id: "bt2", name: "Standard Mechanical BOM", description: "Used for mechanical parts", columns: ["Quantity", "Torque Spec", "Material"] },
 ];

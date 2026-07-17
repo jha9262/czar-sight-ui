@@ -11,6 +11,9 @@ import {
   Settings,
   Factory,
   ChevronDown,
+  Building2,
+  Truck,
+  FileText,
 } from "lucide-react";
 
 import {
@@ -47,6 +50,15 @@ const inventory = {
   ],
 };
 
+const sourcing = {
+  label: "Supply Chain",
+  icon: Truck,
+  children: [
+    { title: "Vendors", url: "/sourcing/vendors" },
+    { title: "Manufacturers", url: "/sourcing/manufacturers" },
+  ],
+};
+
 const stock = {
   label: "Stock Management",
   icon: ClipboardList,
@@ -58,7 +70,9 @@ const stock = {
 };
 
 const admin = [
+  { title: "Companies", url: "/companies", icon: Building2 },
   { title: "Warehouses", url: "/warehouses", icon: Warehouse },
+  { title: "Files", url: "/files", icon: FileText },
   { title: "Users", url: "/users", icon: Users, adminOnly: true },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
@@ -106,16 +120,88 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
+        {/* Inventory, Supply Chain, and Stock Management Group */}
         <SidebarGroup>
-          <SidebarGroupLabel>Catalog</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              <CollapsibleGroup group={inventory} pathname={pathname} isActive={isActive} />
-              <CollapsibleGroup group={stock} pathname={pathname} isActive={isActive} />
+              {/* Inventory */}
+              <Collapsible className="group/collapsible">
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton tooltip={inventory.label}>
+                      <inventory.icon className="h-4 w-4" />
+                      <span>{inventory.label}</span>
+                      <ChevronDown className="ml-auto h-4 w-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      {inventory.children.map((child) => (
+                        <SidebarMenuSubItem key={child.url}>
+                          <SidebarMenuSubButton asChild isActive={isActive(child.url)}>
+                            <Link to={child.url}>{child.title}</Link>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
+
+              {/* Supply Chain */}
+              <Collapsible className="group/collapsible">
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton tooltip={sourcing.label}>
+                      <sourcing.icon className="h-4 w-4" />
+                      <span>{sourcing.label}</span>
+                      <ChevronDown className="ml-auto h-4 w-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      {sourcing.children.map((child) => (
+                        <SidebarMenuSubItem key={child.url}>
+                          <SidebarMenuSubButton asChild isActive={isActive(child.url)}>
+                            <Link to={child.url}>{child.title}</Link>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
+
+              {/* Stock Management */}
+              <Collapsible className="group/collapsible">
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton tooltip={stock.label}>
+                      <stock.icon className="h-4 w-4" />
+                      <span>{stock.label}</span>
+                      <ChevronDown className="ml-auto h-4 w-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      {stock.children.map((child) => (
+                        <SidebarMenuSubItem key={child.url}>
+                          <SidebarMenuSubButton asChild isActive={isActive(child.url)}>
+                            <Link to={child.url}>{child.title}</Link>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
 
+
+
+        {/* Admin links */}
         <SidebarGroup>
           <SidebarGroupLabel>Administration</SidebarGroupLabel>
           <SidebarGroupContent>
@@ -126,11 +212,6 @@ export function AppSidebar() {
                     <Link to={item.url}>
                       <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>
-                      {item.adminOnly && !collapsed && (
-                        <span className="ml-auto rounded bg-sidebar-accent px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-sidebar-foreground/70">
-                          Admin
-                        </span>
-                      )}
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -140,42 +221,5 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
     </Sidebar>
-  );
-}
-
-function CollapsibleGroup({
-  group,
-  pathname,
-  isActive,
-}: {
-  group: { label: string; icon: any; children: { title: string; url: string }[] };
-  pathname: string;
-  isActive: (url: string) => boolean;
-}) {
-  const anyActive = group.children.some((c) => isActive(c.url));
-  const Icon = group.icon;
-  return (
-    <SidebarMenuItem>
-      <Collapsible defaultOpen={anyActive} className="group/collapsible">
-        <CollapsibleTrigger asChild>
-          <SidebarMenuButton tooltip={group.label} isActive={anyActive}>
-            <Icon className="h-4 w-4" />
-            <span>{group.label}</span>
-            <ChevronDown className="ml-auto h-3.5 w-3.5 transition-transform group-data-[state=open]/collapsible:rotate-180" />
-          </SidebarMenuButton>
-        </CollapsibleTrigger>
-        <CollapsibleContent>
-          <SidebarMenuSub>
-            {group.children.map((c) => (
-              <SidebarMenuSubItem key={c.url}>
-                <SidebarMenuSubButton asChild isActive={isActive(c.url)}>
-                  <Link to={c.url}>{c.title}</Link>
-                </SidebarMenuSubButton>
-              </SidebarMenuSubItem>
-            ))}
-          </SidebarMenuSub>
-        </CollapsibleContent>
-      </Collapsible>
-    </SidebarMenuItem>
   );
 }
