@@ -70,12 +70,12 @@ function Dashboard() {
         description="Live snapshot across warehouses, inventory and stock movements."
         actions={
           <>
-            <Button variant="outline" size="sm">
+            {/* <Button variant="outline" size="sm">
               <Warehouse className="mr-1.5 h-4 w-4" /> Add warehouse
             </Button>
             <Button variant="outline" size="sm">
               <Package className="mr-1.5 h-4 w-4" /> Register item
-            </Button>
+            </Button> */}
             <Button size="sm">
               <Plus className="mr-1.5 h-4 w-4" /> New stock entry
             </Button>
